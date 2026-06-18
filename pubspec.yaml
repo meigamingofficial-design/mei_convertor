@@ -1,0 +1,97 @@
+name: mei_convertor
+description: "Mei Convertor — Premium offline-first file conversion utility."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.12.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  cupertino_icons: ^1.0.9
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Data Models
+  equatable: ^2.0.7
+  collection: ^1.19.1
+
+  # Local Storage
+  path_provider: ^2.1.5
+
+  # File Handling
+  file_picker: ^11.0.2
+  share_plus: ^12.0.0
+  open_filex: ^4.5.0
+
+  # Image Processing
+  image: ^4.3.0
+  flutter_image_compress: ^2.4.0
+
+  # PDF
+  pdf: ^3.11.3
+  printing: ^5.14.1
+
+  # PDF merge / split (cross-platform, no AGPL)
+  syncfusion_flutter_pdf: ^28.1.33
+
+  # DOCX generation is done natively via the 'archive' package above (no extra dep needed)
+
+  # ZIP/archive helper for DOCX reading (DOCX is a ZIP). v4+ required by lottie.
+  archive: ^4.0.9
+
+  # UI & Animation
+  flutter_animate: ^4.5.2
+  # google_fonts removed — fonts are bundled locally for offline-first
+  gap: ^3.0.1
+  shimmer: ^3.0.0
+  lottie: ^3.3.1
+
+  # Permissions
+  permission_handler: ^11.4.0
+
+  # Utilities
+  intl: ^0.20.0
+  logger: ^2.5.0
+  path: ^1.9.1
+  mime: ^2.0.0
+  uuid: ^4.5.1
+  shared_preferences: ^2.3.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Code Generation (build_runner kept for possible future codegen)
+  build_runner: ^2.4.13
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+    - assets/legal/
+
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
