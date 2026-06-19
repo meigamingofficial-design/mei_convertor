@@ -65,15 +65,18 @@ void main() {
 
   print('Cropped image size: ${cropped.width}x${cropped.height}');
 
+  // Convert cropped image to 4 channels (RGBA) so that transparency works!
+  final croppedRGBA = cropped.convert(numChannels: 4);
+
   // 3. Flood fill starting from all 4 corners to make background transparent
-  final visited = List.generate(cropped.width, (_) => List.filled(cropped.height, false));
+  final visited = List.generate(croppedRGBA.width, (_) => List.filled(croppedRGBA.height, false));
   final queue = Queue<(int, int)>();
 
   void addPixel(int x, int y) {
-    if (x < 0 || x >= cropped.width || y < 0 || y >= cropped.height) return;
+    if (x < 0 || x >= croppedRGBA.width || y < 0 || y >= croppedRGBA.height) return;
     if (visited[x][y]) return;
 
-    final pixel = cropped.getPixel(x, y);
+    final pixel = croppedRGBA.getPixel(x, y);
     final r = pixel.r.toInt();
     final g = pixel.g.toInt();
     final b = pixel.b.toInt();
@@ -93,9 +96,9 @@ void main() {
   }
 
   addPixel(0, 0);
-  addPixel(cropped.width - 1, 0);
-  addPixel(0, cropped.height - 1);
-  addPixel(cropped.width - 1, cropped.height - 1);
+  addPixel(croppedRGBA.width - 1, 0);
+  addPixel(0, croppedRGBA.height - 1);
+  addPixel(croppedRGBA.width - 1, croppedRGBA.height - 1);
 
   while (queue.isNotEmpty) {
     final (cx, cy) = queue.removeFirst();
@@ -119,7 +122,7 @@ void main() {
   // Scale the cropped transparent flower to occupy exactly 65% of the canvas size
   final targetContentSize = (canvasSize * 0.65).toInt(); // 665 px
   final scaledFlower = img.copyResize(
-    cropped,
+    croppedRGBA,
     width: targetContentSize,
     height: targetContentSize,
     interpolation: img.Interpolation.cubic,
