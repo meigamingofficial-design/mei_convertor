@@ -170,14 +170,19 @@ class _HomeAppBar extends ConsumerWidget {
                 width: 34,
                 height: 34,
                 decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [MeiColors.sakura, MeiColors.lavender],
+                  ),
                   borderRadius: MeiRadius.smAll,
                   boxShadow: MeiShadows.soft,
                 ),
-                child: ClipRRect(
-                  borderRadius: MeiRadius.smAll,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
                   child: Image.asset(
-                    MeiAssets.logo,
-                    fit: BoxFit.cover,
+                    MeiAssets.logoTransparent,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),

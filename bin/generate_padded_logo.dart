@@ -105,18 +105,18 @@ void main() {
     addPixel(cx, cy - 1);
   }
 
-  // 4. Create a 1024x1024 transparent canvas
+  // 4. Create a 1024x1024 transparent canvas pre-filled with pink color (but 0 alpha)
+  // to avoid dark borders during interpolation
   const canvasSize = 1024;
-  final transparentCanvas = img.Image(width: canvasSize, height: canvasSize);
+  final transparentCanvas = img.Image(width: canvasSize, height: canvasSize, numChannels: 4);
   for (final pixel in transparentCanvas) {
-    pixel.r = 0;
-    pixel.g = 0;
-    pixel.b = 0;
+    pixel.r = 252;
+    pixel.g = 247;
+    pixel.b = 252;
     pixel.a = 0;
   }
 
   // Scale the cropped transparent flower to occupy exactly 65% of the canvas size
-  // (65% of 1024 is ~665px)
   final targetContentSize = (canvasSize * 0.65).toInt(); // 665 px
   final scaledFlower = img.copyResize(
     cropped,
@@ -125,7 +125,7 @@ void main() {
     interpolation: img.Interpolation.cubic,
   );
 
-  // Composite the scaled flower in the center of the 1024x1024 canvas
+  // Composite the scaled flower in the center of the transparent canvas
   final offset = (canvasSize - targetContentSize) ~/ 2;
   img.compositeImage(
     transparentCanvas,
@@ -139,10 +139,10 @@ void main() {
   final transparentLogoFile = File('assets/images/logo_transparent.png');
   transparentLogoFile.parent.createSync(recursive: true);
   transparentLogoFile.writeAsBytesSync(img.encodePng(transparentCanvas));
-  print('Successfully generated assets/images/logo_transparent.png (padded content, transparent bg)');
+  print('Successfully generated assets/images/logo_transparent.png');
 
-  // 5. Create a 1024x1024 solid background canvas (brand pink color #FCF7FC)
-  final solidCanvas = img.Image(width: canvasSize, height: canvasSize);
+  // 5. Create a 1024x1024 solid background canvas pre-filled with the solid pink color
+  final solidCanvas = img.Image(width: canvasSize, height: canvasSize, numChannels: 4);
   for (final pixel in solidCanvas) {
     pixel.r = 252;
     pixel.g = 247;
@@ -150,17 +150,17 @@ void main() {
     pixel.a = 255;
   }
 
-  // Composite the transparent canvas on top of the solid background
+  // Composite the scaled flower directly onto the solid background
   img.compositeImage(
     solidCanvas,
-    transparentCanvas,
-    dstX: 0,
-    dstY: 0,
+    scaledFlower,
+    dstX: offset,
+    dstY: offset,
     blend: img.BlendMode.alpha,
   );
 
   // Save the padded solid background logo as logo.png
   final logoFile = File('assets/images/logo.png');
   logoFile.writeAsBytesSync(img.encodePng(solidCanvas));
-  print('Successfully generated assets/images/logo.png (padded content, solid pink bg)');
+  print('Successfully generated assets/images/logo.png');
 }

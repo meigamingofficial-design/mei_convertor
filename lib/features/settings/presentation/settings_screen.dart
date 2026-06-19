@@ -54,14 +54,19 @@ class SettingsScreen extends ConsumerWidget {
                     width: 56,
                     height: 56,
                     decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [MeiColors.sakura, MeiColors.lavender],
+                      ),
                       borderRadius: MeiRadius.lgAll,
                       boxShadow: MeiShadows.soft,
                     ),
-                    child: ClipRRect(
-                      borderRadius: MeiRadius.lgAll,
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
                       child: Image.asset(
-                        MeiAssets.logo,
-                        fit: BoxFit.cover,
+                        MeiAssets.logoTransparent,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
