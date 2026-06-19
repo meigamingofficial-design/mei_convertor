@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.meigaming" "\0"
-            VALUE "FileDescription", "mei_convertor" "\0"
+            VALUE "FileDescription", "Mei Convertor" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "mei_convertor" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.meigaming. All rights reserved." "\0"
             VALUE "OriginalFilename", "mei_convertor.exe" "\0"
-            VALUE "ProductName", "mei_convertor" "\0"
+            VALUE "ProductName", "Mei Convertor" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -1,6 +1,6 @@
 {
-    "name": "mei_convertor",
-    "short_name": "mei_convertor",
+    "name": "Mei Convertor",
+    "short_name": "Mei Convertor",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
