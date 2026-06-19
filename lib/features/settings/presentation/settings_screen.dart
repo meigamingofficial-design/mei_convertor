@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/mei_card.dart';
@@ -53,18 +54,15 @@ class SettingsScreen extends ConsumerWidget {
                     width: 56,
                     height: 56,
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [MeiColors.sakura, MeiColors.lavender],
-                      ),
                       borderRadius: MeiRadius.lgAll,
                       boxShadow: MeiShadows.soft,
                     ),
-                    child: const Icon(
-                      Icons.transform_rounded,
-                      color: MeiColors.white,
-                      size: 26,
+                    child: ClipRRect(
+                      borderRadius: MeiRadius.lgAll,
+                      child: Image.asset(
+                        MeiAssets.logo,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   const Gap(MeiSpacing.md),

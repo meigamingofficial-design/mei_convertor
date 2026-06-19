@@ -29,23 +29,49 @@ class HomeGreetingHeader extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          _getDate(lang),
-          style: MeiTextStyles.labelMedium.copyWith(
-            color: MeiColors.textTertiary,
-            letterSpacing: 0.5,
+        // Pill date badge
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: MeiSpacing.md,
+            vertical: MeiSpacing.xxs + 2,
+          ),
+          decoration: BoxDecoration(
+            color: MeiColors.sakuraLighter,
+            borderRadius: MeiRadius.fullAll,
+            border: Border.all(
+              color: MeiColors.sakura.withValues(alpha: 0.30),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.calendar_today_rounded, size: 11, color: MeiColors.sakuraDark),
+              const Gap(MeiSpacing.xs),
+              Text(
+                _getDate(lang),
+                style: MeiTextStyles.labelMedium.copyWith(
+                  color: MeiColors.sakuraDeep,
+                  letterSpacing: 0.3,
+                  fontSize: 11,
+                ),
+              ),
+            ],
           ),
         ),
-        const Gap(MeiSpacing.xs),
+        const Gap(MeiSpacing.sm),
         Text(
           '${_getGreeting(ref)} 👋',
-          style: MeiTextStyles.displayMedium,
+          style: MeiTextStyles.displayMedium.copyWith(
+            letterSpacing: -0.5,
+          ),
         ),
         const Gap(MeiSpacing.xs),
         Text(
           ref.tr('home_greeting_sub'),
           style: MeiTextStyles.bodyLarge.copyWith(
             color: MeiColors.textSecondary,
+            height: 1.4,
           ),
         ),
       ],

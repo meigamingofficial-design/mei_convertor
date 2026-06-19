@@ -58,8 +58,12 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                   vertical: MeiSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: MeiColors.white.withValues(alpha: 0.6),
+                  color: Colors.white.withValues(alpha: 0.18),
                   borderRadius: MeiRadius.fullAll,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -67,8 +71,8 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                     Container(
                       width: 6,
                       height: 6,
-                      decoration: const BoxDecoration(
-                        color: MeiColors.sakuraDark,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -76,7 +80,7 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                     Text(
                       ref.tr('home_quick_title'),
                       style: MeiTextStyles.labelMedium.copyWith(
-                        color: MeiColors.sakuraDeep,
+                        color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -85,7 +89,7 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
               ),
               if (state.sourcePath != null)
                 IconButton(
-                  icon: const Icon(Icons.refresh_rounded, size: 20, color: MeiColors.sakuraDeep),
+                  icon: Icon(Icons.refresh_rounded, size: 20, color: Colors.white.withValues(alpha: 0.85)),
                   onPressed: notifier.reset,
                   tooltip: ref.tr('clear_all'),
                   padding: EdgeInsets.zero,
@@ -106,40 +110,44 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
               },
               onTapCancel: () => setState(() => _pressed = false),
               child: AnimatedScale(
-                scale: _pressed ? 0.98 : 1.0,
-                duration: const Duration(milliseconds: 100),
+                scale: _pressed ? 0.97 : 1.0,
+                duration: const Duration(milliseconds: 120),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: MeiSpacing.xl),
                   decoration: BoxDecoration(
-                    color: MeiColors.white.withValues(alpha: 0.5),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: MeiRadius.lgAll,
                     border: Border.all(
-                      color: MeiColors.sakura.withValues(alpha: 0.3),
+                      color: Colors.white.withValues(alpha: 0.35),
                       width: 1.5,
                     ),
                   ),
                   child: Column(
                     children: [
                       Container(
-                        width: 48,
-                        height: 48,
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
-                          color: MeiColors.white.withValues(alpha: 0.8),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: MeiRadius.mdAll,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.add_circle_outline_rounded,
-                          color: MeiColors.sakuraDark,
-                          size: 24,
+                        child: Icon(
+                          Icons.add_rounded,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          size: 26,
                         ),
                       ),
                       const Gap(MeiSpacing.md),
                       Text(
                         ref.tr('quick_empty'),
                         style: MeiTextStyles.titleMedium.copyWith(
-                          color: MeiColors.gray800,
-                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -147,7 +155,7 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                       Text(
                         ref.tr('quick_empty_sub'),
                         style: MeiTextStyles.bodySmall.copyWith(
-                          color: MeiColors.gray600,
+                          color: Colors.white.withValues(alpha: 0.70),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -161,23 +169,27 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
             Container(
               padding: const EdgeInsets.all(MeiSpacing.md),
               decoration: BoxDecoration(
-                color: MeiColors.white.withValues(alpha: 0.6),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: MeiRadius.lgAll,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  width: 1,
+                ),
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: MeiColors.sakura,
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.25),
                       borderRadius: MeiRadius.mdAll,
                     ),
                     child: Center(
                       child: Text(
                         state.sourcePath!.split('.').last.toUpperCase(),
                         style: MeiTextStyles.labelMedium.copyWith(
-                          color: MeiColors.white,
+                          color: Colors.white,
                           fontWeight: FontWeight.w800,
                           fontSize: 10,
                         ),
@@ -192,7 +204,7 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                         Text(
                           state.sourcePath!.split('/').last,
                           style: MeiTextStyles.titleMedium.copyWith(
-                            color: MeiColors.gray800,
+                            color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
                           maxLines: 1,
@@ -203,7 +215,7 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                           Text(
                             detectedType.displayName,
                             style: MeiTextStyles.bodySmall.copyWith(
-                              color: MeiColors.gray600,
+                              color: Colors.white.withValues(alpha: 0.70),
                             ),
                           ),
                         ],
@@ -211,7 +223,7 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 18, color: MeiColors.gray600),
+                    icon: Icon(Icons.close_rounded, size: 18, color: Colors.white.withValues(alpha: 0.80)),
                     onPressed: notifier.reset,
                   ),
                 ],
@@ -223,7 +235,7 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
               Text(
                 ref.tr('quick_label_convert_to'),
                 style: MeiTextStyles.labelMedium.copyWith(
-                  color: MeiColors.gray800,
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -242,16 +254,20 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                         notifier.setTargetFormat(conversion);
                       }
                     },
-                    selectedColor: MeiColors.sakuraDeep,
-                    backgroundColor: MeiColors.white.withValues(alpha: 0.65),
+                    selectedColor: Colors.white,
+                    backgroundColor: Colors.white.withValues(alpha: 0.18),
                     labelStyle: MeiTextStyles.labelSmall.copyWith(
                       color: isSelected
-                          ? MeiColors.white
-                          : (isSpecial ? MeiColors.sakuraDeep : MeiColors.textSecondary),
-                      fontWeight: isSelected || isSpecial ? FontWeight.w600 : FontWeight.w500,
+                          ? MeiColors.sakuraDeep
+                          : (isSpecial
+                              ? Colors.white
+                              : Colors.white.withValues(alpha: 0.80)),
+                      fontWeight: isSelected || isSpecial ? FontWeight.w700 : FontWeight.w500,
                     ),
-                    shape: const StadiumBorder(
-                      side: BorderSide(color: MeiColors.border),
+                    shape: StadiumBorder(
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: isSelected ? 0 : 0.30),
+                      ),
                     ),
                     showCheckmark: false,
                   );
@@ -301,9 +317,12 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                   icon: const Icon(Icons.transform_rounded, size: 16),
                   label: Text(ref.tr('quick_btn_convert').replaceAll('{format}', _formatLabel(selectedConversion, ref))),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: MeiColors.sakuraDeep,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Colors.white,
+                    foregroundColor: MeiColors.sakuraDeep,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    textStyle: MeiTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w700),
+                    shadowColor: Colors.black.withValues(alpha: 0.15),
+                    elevation: 2,
                   ),
                 ),
               ),
@@ -311,16 +330,21 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
 
             if (converting) ...[
               const Gap(MeiSpacing.lg),
-              const LinearProgressIndicator(
-                color: MeiColors.sakuraDeep,
-                backgroundColor: MeiColors.sakuraLighter,
-                minHeight: 4,
+              ClipRRect(
+                borderRadius: MeiRadius.fullAll,
+                child: LinearProgressIndicator(
+                  color: Colors.white,
+                  backgroundColor: Colors.white.withValues(alpha: 0.25),
+                  minHeight: 5,
+                ),
               ),
               const Gap(MeiSpacing.xs),
               Center(
                 child: Text(
                   ref.tr('quick_btn_converting'),
-                  style: MeiTextStyles.bodySmall.copyWith(color: MeiColors.gray600),
+                  style: MeiTextStyles.bodySmall.copyWith(
+                    color: Colors.white.withValues(alpha: 0.75),
+                  ),
                 ),
               ),
             ],
@@ -330,19 +354,23 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
               Container(
                 padding: const EdgeInsets.all(MeiSpacing.md),
                 decoration: BoxDecoration(
-                  color: MeiColors.successLight.withValues(alpha: 0.6),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: MeiRadius.lgAll,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.check_circle_rounded, color: MeiColors.success, size: 20),
+                        Icon(Icons.check_circle_rounded, color: Colors.white.withValues(alpha: 0.9), size: 20),
                         const Gap(MeiSpacing.sm),
                         Expanded(
                           child: Text(
                             ref.tr('quick_success'),
-                            style: MeiTextStyles.titleMedium.copyWith(color: MeiColors.textPrimary),
+                            style: MeiTextStyles.titleMedium.copyWith(color: Colors.white),
                           ),
                         ),
                       ],
@@ -356,8 +384,8 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                             icon: const Icon(Icons.open_in_new_rounded, size: 14),
                             label: Text(ref.tr('open')),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: MeiColors.textPrimary,
-                              side: const BorderSide(color: MeiColors.border),
+                              foregroundColor: Colors.white,
+                              side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
                             ),
                           ),
                         ),
@@ -368,8 +396,8 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                             icon: const Icon(Icons.share_rounded, size: 14),
                             label: Text(ref.tr('share')),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: MeiColors.sakuraDeep,
-                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.white,
+                              foregroundColor: MeiColors.sakuraDeep,
                             ),
                           ),
                         ),
@@ -378,7 +406,10 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                     const Gap(MeiSpacing.sm),
                     TextButton(
                       onPressed: notifier.reset,
-                      child: Text(ref.tr('convert_another_file')),
+                      child: Text(
+                        ref.tr('convert_another_file'),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.80)),
+                      ),
                     ),
                   ],
                 ),
@@ -390,20 +421,26 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
               Container(
                 padding: const EdgeInsets.all(MeiSpacing.md),
                 decoration: BoxDecoration(
-                  color: MeiColors.errorLight.withValues(alpha: 0.6),
+                  color: Colors.black.withValues(alpha: 0.15),
                   borderRadius: MeiRadius.lgAll,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.20),
+                    width: 1,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.error_outline_rounded, color: MeiColors.error, size: 20),
+                        Icon(Icons.error_outline_rounded, color: Colors.white.withValues(alpha: 0.9), size: 20),
                         const Gap(MeiSpacing.sm),
                         Expanded(
                           child: Text(
                             errorMessage,
-                            style: MeiTextStyles.bodySmall.copyWith(color: MeiColors.error),
+                            style: MeiTextStyles.bodySmall.copyWith(
+                              color: Colors.white.withValues(alpha: 0.85),
+                            ),
                           ),
                         ),
                       ],
@@ -414,6 +451,10 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: notifier.convert,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: BorderSide(color: Colors.white.withValues(alpha: 0.4)),
+                            ),
                             child: Text(ref.tr('try_again')),
                           ),
                         ),
@@ -421,6 +462,9 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                         Expanded(
                           child: TextButton(
                             onPressed: notifier.reset,
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white.withValues(alpha: 0.75),
+                            ),
                             child: Text(ref.tr('cancel')),
                           ),
                         ),

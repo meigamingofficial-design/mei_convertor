@@ -99,25 +99,87 @@ class MeiHeroCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: effectiveBorderRadius,
-        overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.1)),
+        overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.08)),
         child: Container(
-          padding: padding ?? MeiSpacing.cardPaddingLg,
           decoration: BoxDecoration(
             gradient: gradient ??
                 const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFFF5D8E3),
-                    Color(0xFFEEE5F5),
-                    Color(0xFFE8F0FA),
+                    Color(0xFFCE5580), // deep sakura
+                    Color(0xFFAA5AA8), // violet-pink
+                    Color(0xFF7B70C0), // lavender
+                    Color(0xFF5B8FC8), // sky
                   ],
-                  stops: [0.0, 0.55, 1.0],
+                  stops: [0.0, 0.33, 0.66, 1.0],
                 ),
             borderRadius: effectiveBorderRadius,
-            boxShadow: MeiShadows.card,
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x38C05A82),
+                blurRadius: 32,
+                offset: Offset(0, 12),
+                spreadRadius: -4,
+              ),
+              BoxShadow(
+                color: Color(0x14000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
-          child: child,
+          child: ClipRRect(
+            borderRadius: effectiveBorderRadius,
+            child: Stack(
+              children: [
+                // Decorative circle — top right
+                Positioned(
+                  top: -48,
+                  right: -32,
+                  child: Container(
+                    width: 160,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.10),
+                    ),
+                  ),
+                ),
+                // Decorative circle — bottom left
+                Positioned(
+                  bottom: -24,
+                  left: -24,
+                  child: Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.07),
+                    ),
+                  ),
+                ),
+                // Decorative circle — mid right
+                Positioned(
+                  top: 24,
+                  right: 70,
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.06),
+                    ),
+                  ),
+                ),
+                // Content
+                Padding(
+                  padding: padding ?? MeiSpacing.cardPaddingLg,
+                  child: child,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -162,69 +224,93 @@ class _MeiFeatureTileState extends State<MeiFeatureTile> {
       },
       onTapCancel: () => setState(() => _isPressed = false),
       child: AnimatedScale(
-        scale: _isPressed ? 0.975 : 1.0,
-        duration: const Duration(milliseconds: 120),
+        scale: _isPressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 130),
         curve: Curves.easeOutCubic,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 130),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: MeiColors.white,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                widget.accentBackground,
+                widget.accentBackground.withValues(alpha: 0.5),
+                MeiColors.white,
+              ],
+              stops: const [0.0, 0.4, 1.0],
+            ),
             borderRadius: MeiRadius.lgAll,
             border: Border.all(
-              color: widget.accentColor.withValues(alpha: 0.12),
+              color: widget.accentColor.withValues(alpha: _isPressed ? 0.22 : 0.13),
               width: 1.2,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: widget.accentColor.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-              const BoxShadow(
-                color: Color(0x041C1A18),
-                blurRadius: 4,
-                offset: Offset(0, 1),
-              ),
-            ],
+            boxShadow: _isPressed
+                ? [
+                    BoxShadow(
+                      color: widget.accentColor.withValues(alpha: 0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: widget.accentColor.withValues(alpha: 0.20),
+                      blurRadius: 20,
+                      offset: const Offset(0, 7),
+                      spreadRadius: -3,
+                    ),
+                    const BoxShadow(
+                      color: Color(0x06000000),
+                      blurRadius: 4,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Top row: icon + badge
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          widget.accentBackground,
-                          widget.accentBackground.withValues(alpha: 0.6),
+                          widget.accentColor,
+                          widget.accentColor.withValues(alpha: 0.78),
                         ],
                       ),
                       borderRadius: MeiRadius.mdAll,
-                      border: Border.all(
-                        color: widget.accentColor.withValues(alpha: 0.15),
-                        width: 1.2,
-                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: widget.accentColor.withValues(alpha: 0.38),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       widget.icon,
-                      color: widget.accentColor,
-                      size: 20,
+                      color: Colors.white,
+                      size: 22,
                     ),
                   ),
                   if (widget.badge != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
-                        color: widget.accentBackground.withValues(alpha: 0.8),
+                        color: widget.accentColor.withValues(alpha: 0.12),
                         borderRadius: MeiRadius.fullAll,
                         border: Border.all(
-                          color: widget.accentColor.withValues(alpha: 0.15),
+                          color: widget.accentColor.withValues(alpha: 0.22),
                           width: 1,
                         ),
                       ),
@@ -248,7 +334,7 @@ class _MeiFeatureTileState extends State<MeiFeatureTile> {
                   color: MeiColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
               Expanded(
                 child: Text(
                   widget.subtitle,
@@ -258,6 +344,23 @@ class _MeiFeatureTileState extends State<MeiFeatureTile> {
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              // Arrow affordance
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: widget.accentColor.withValues(alpha: 0.12),
+                    borderRadius: MeiRadius.fullAll,
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    color: widget.accentColor,
+                    size: 14,
+                  ),
                 ),
               ),
             ],
@@ -270,4 +373,3 @@ class _MeiFeatureTileState extends State<MeiFeatureTile> {
         .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
   }
 }
-

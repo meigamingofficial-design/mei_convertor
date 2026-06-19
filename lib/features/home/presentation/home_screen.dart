@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/theme.dart';
-import '../../../core/widgets/mei_states.dart';
 import '../../../routing/app_router.dart';
 import '../widgets/home_feature_grid.dart';
 import '../widgets/home_greeting_header.dart';
@@ -34,75 +34,116 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MeiColors.offWhite,
-      body: SafeArea(
-        child: CustomScrollView(
-          controller: _scrollController,
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
+      body: Stack(
+        children: [
+          // Decorative sakura bloom — top right atmospheric glow
+          Positioned(
+            top: -80,
+            right: -80,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0x22E8A0B4), // sakura pink tint
+                    Color(0x00F9F7F5), // transparent
+                  ],
+                ),
+              ),
+            ),
           ),
-          slivers: [
-            // Top App Bar
-            const SliverAppBar(
-              pinned: false,
-              floating: true,
-              snap: true,
-              backgroundColor: MeiColors.offWhite,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              toolbarHeight: 64,
-              flexibleSpace: FlexibleSpaceBar(
-                background: _HomeAppBar(),
-                collapseMode: CollapseMode.none,
+          // Decorative lavender bloom — bottom left
+          Positioned(
+            bottom: 60,
+            left: -60,
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Color(0x14B8AECC), // lavender tint
+                    Color(0x00F9F7F5),
+                  ],
+                ),
               ),
             ),
-
-            // Content
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                MeiSpacing.lg,
-                MeiSpacing.xs,
-                MeiSpacing.lg,
-                MeiSpacing.massive,
+          ),
+          // Main scrollable content
+          SafeArea(
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
               ),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // Greeting
-                  const HomeGreetingHeader(),
-                  const Gap(MeiSpacing.xxl),
-
-                  // Quick Convert Hero Card
-                  HomeQuickConvertHero(
-                    onTap: () => context.push(MeiRoutes.quickConvert),
+              slivers: [
+                // Top App Bar
+                const SliverAppBar(
+                  pinned: false,
+                  floating: true,
+                  snap: true,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  toolbarHeight: 64,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: _HomeAppBar(),
+                    collapseMode: CollapseMode.none,
                   ),
-                  const Gap(MeiSpacing.xxl),
+                ),
 
-                  // Feature Grid
-                  MeiSectionHeader(
-                    title: ref.tr('home_section_tools'),
-                    trailing: TextButton(
-                      onPressed: () => context.push(MeiRoutes.allTools),
-                      child: Text(ref.tr('home_view_all')),
-                    ),
+                // Content
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    MeiSpacing.lg,
+                    MeiSpacing.xs,
+                    MeiSpacing.lg,
+                    MeiSpacing.massive,
                   ),
-                  const Gap(MeiSpacing.md),
-                  const HomeFeatureGrid(),
-                  const Gap(MeiSpacing.xxl),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      // Greeting
+                      const HomeGreetingHeader(),
+                      const Gap(MeiSpacing.xxl),
 
-                  // Recent Files
-                  MeiSectionHeader(
-                    title: ref.tr('home_section_recent'),
-                    trailing: TextButton(
-                      onPressed: () => context.push(MeiRoutes.recentFiles),
-                      child: Text(ref.tr('home_see_all')),
-                    ),
+                      // Quick Convert Hero Card
+                      HomeQuickConvertHero(
+                        onTap: () => context.push(MeiRoutes.quickConvert),
+                      ),
+                      const Gap(MeiSpacing.xxl),
+
+                      // Feature Grid
+                      _SectionHeader(
+                        title: ref.tr('home_section_tools'),
+                        trailing: TextButton(
+                          onPressed: () => context.push(MeiRoutes.allTools),
+                          child: Text(ref.tr('home_view_all')),
+                        ),
+                      ),
+                      const Gap(MeiSpacing.md),
+                      const HomeFeatureGrid(),
+                      const Gap(MeiSpacing.xxl),
+
+                      // Recent Files
+                      _SectionHeader(
+                        title: ref.tr('home_section_recent'),
+                        trailing: TextButton(
+                          onPressed: () => context.push(MeiRoutes.recentFiles),
+                          child: Text(ref.tr('home_see_all')),
+                        ),
+                      ),
+                      const Gap(MeiSpacing.md),
+                      const HomeRecentFilesSection(),
+                    ]),
                   ),
-                  const Gap(MeiSpacing.md),
-                  const HomeRecentFilesSection(),
-                ]),
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -129,18 +170,15 @@ class _HomeAppBar extends ConsumerWidget {
                 width: 34,
                 height: 34,
                 decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [MeiColors.sakura, MeiColors.lavender],
-                  ),
                   borderRadius: MeiRadius.smAll,
                   boxShadow: MeiShadows.soft,
                 ),
-                child: const Icon(
-                  Icons.transform_rounded,
-                  color: MeiColors.white,
-                  size: 18,
+                child: ClipRRect(
+                  borderRadius: MeiRadius.smAll,
+                  child: Image.asset(
+                    MeiAssets.logo,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const Gap(MeiSpacing.sm),
@@ -220,6 +258,46 @@ class _AppBarIconButtonState extends State<_AppBarIconButton> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    required this.title,
+    this.trailing,
+  });
+
+  final String title;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 18,
+              decoration: const BoxDecoration(
+                color: MeiColors.sakura,
+                borderRadius: MeiRadius.xsAll,
+              ),
+            ),
+            const Gap(MeiSpacing.sm),
+            Text(
+              title,
+              style: MeiTextStyles.headlineSmall.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        ?trailing,
+      ],
     );
   }
 }

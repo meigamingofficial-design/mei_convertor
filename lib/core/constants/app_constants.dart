@@ -11,6 +11,7 @@ class MeiAssets {
   static const String imagesDir = 'assets/images/';
   static const String iconsDir = 'assets/icons/';
   static const String animationsDir = 'assets/animations/';
+  static const String logo = '${imagesDir}logo.png';
 
   // Lottie
   static const String lottieEmpty = 'assets/animations/empty.json';
