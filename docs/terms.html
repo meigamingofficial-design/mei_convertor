@@ -13,70 +13,23 @@
       --sakura-light: #fff0f5;
       --sakura-deep: #b83b5e;
       --accent-gold: #ffd68a;
-      --bg-base: #fbfaf7;
       --text-dark: #1d1d26;
       --text-muted: #535366;
-      --card-bg: rgba(255, 255, 255, 0.72);
-      --border-color: rgba(232, 114, 154, 0.12);
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --border-color: rgba(232, 114, 154, 0.15);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background-color: var(--bg-base);
+      background-image: url('terms_bg.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
       color: var(--text-dark);
       line-height: 1.8;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
-    }
-    
-    /* Vibrant Floating Background Blobs */
-    .bg-blobs {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(130px);
-      opacity: 0.6;
-      mix-blend-mode: multiply;
-      animation: float 25s infinite alternate ease-in-out;
-    }
-    .blob-1 {
-      width: 500px;
-      height: 500px;
-      background: #ffdce8;
-      top: -150px;
-      left: -100px;
-    }
-    .blob-2 {
-      width: 600px;
-      height: 600px;
-      background: #ffebd3;
-      bottom: -200px;
-      right: -100px;
-      animation-duration: 30s;
-      animation-delay: -5s;
-    }
-    .blob-3 {
-      width: 400px;
-      height: 400px;
-      background: #e8e4ff;
-      top: 30%;
-      left: 25%;
-      animation-duration: 35s;
-      animation-delay: -10s;
-    }
-    @keyframes float {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(50px, 80px) scale(1.15); }
-      100% { transform: translate(-30px, -50px) scale(0.9); }
     }
     
     /* Navigation Bar */
@@ -84,7 +37,7 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(251, 250, 247, 0.8);
+      background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-color);
@@ -126,9 +79,19 @@
     
     /* Hero Section */
     .hero {
-      padding: 120px 24px 80px;
+      padding: 100px 24px 80px;
       text-align: center;
       position: relative;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .hero-gif {
+      width: 130px;
+      height: 130px;
+      object-fit: contain;
+      margin-bottom: 16px;
     }
     .hero h1 {
       font-size: 44px;
@@ -142,17 +105,14 @@
     /* Content Section */
     .container {
       max-width: 800px;
-      margin: 0 auto;
-      padding: 40px 24px 120px;
-    }
-    .legal-card {
-      background: var(--card-bg);
+      margin: 60px auto 100px;
+      padding: 60px 48px;
+      background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: 28px;
-      padding: 48px;
-      box-shadow: 0 10px 40px rgba(184, 59, 94, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 32px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.06);
     }
     .meta-box {
       background: var(--sakura-light);
@@ -197,7 +157,7 @@
     
     /* Footer */
     .footer {
-      background: rgba(251, 250, 247, 0.5);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(10px);
       border-top: 1px solid var(--border-color);
       padding: 48px 24px;
@@ -217,12 +177,6 @@
 </head>
 <body>
 
-<div class="bg-blobs">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
-
 <header class="navbar">
   <a href="index.html" class="nav-logo">
     <img src="logo_transparent.png" alt="Logo" class="logo-img">
@@ -235,6 +189,8 @@
 </header>
 
 <section class="hero">
+  <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmQ4MWY1MGZqMDFnbW5yeXg1OGN4amQyd241a2p1ZzV4biZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lwaHkmY3Q9cw/3orif2u99L2O6Gi1CW/giphy.gif" alt="Cute Goofy Writing Pencil" class="hero-gif">
+  <br>
   <h1>Terms &amp; Conditions</h1>
 </section>
 
@@ -243,7 +199,7 @@
     <div class="meta-box">
       <strong>Effective Date:</strong> June 2026<br>
       <strong>Developer:</strong> Meigaming<br>
-      <strong>Contact:</strong> <a href="mailto:meigaming.official@gmail.com" style="color: var(--sakura-deep); text-decoration: none;">meigaming.official@gmail.com</a>
+      <strong>Contact:</strong> <a href="mailto:meigaming.official@gmail.com" style="color: var(--sakura-deep); text-decoration: none;">meigaming.official@gmail.com</a><br>
       <strong>App:</strong> Mei Convertor (com.meigaming.meiconvertor)
     </div>
 
