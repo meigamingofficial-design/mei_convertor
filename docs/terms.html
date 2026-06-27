@@ -96,12 +96,17 @@
     .nav-logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       font-weight: 700;
       font-size: 20px;
       color: var(--text-dark);
       text-decoration: none;
       letter-spacing: -0.03em;
+    }
+    .logo-img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
     }
     .nav-logo span { color: var(--sakura-primary); }
     .nav-links {
@@ -220,7 +225,8 @@
 
 <header class="navbar">
   <a href="index.html" class="nav-logo">
-    🌸 Mei Convertor
+    <img src="logo_transparent.png" alt="Logo" class="logo-img">
+    Mei Convertor
   </a>
   <nav class="nav-links">
     <a href="index.html">Home</a>
