@@ -12,19 +12,71 @@
       --sakura-primary: #e8729a;
       --sakura-light: #fff0f5;
       --sakura-deep: #b83b5e;
-      --bg-cream: #fbfaf7;
-      --text-dark: #2c2c35;
-      --text-muted: #6e6e80;
-      --card-bg: #ffffff;
-      --border-color: #f3ecec;
+      --accent-gold: #ffd68a;
+      --bg-base: #fbfaf7;
+      --text-dark: #1d1d26;
+      --text-muted: #535366;
+      --card-bg: rgba(255, 255, 255, 0.72);
+      --border-color: rgba(232, 114, 154, 0.12);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background-color: var(--bg-cream);
+      background-color: var(--bg-base);
       color: var(--text-dark);
       line-height: 1.8;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    
+    /* Vibrant Floating Background Blobs */
+    .bg-blobs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(130px);
+      opacity: 0.6;
+      mix-blend-mode: multiply;
+      animation: float 25s infinite alternate ease-in-out;
+    }
+    .blob-1 {
+      width: 500px;
+      height: 500px;
+      background: #ffdce8;
+      top: -150px;
+      left: -100px;
+    }
+    .blob-2 {
+      width: 600px;
+      height: 600px;
+      background: #ffebd3;
+      bottom: -200px;
+      right: -100px;
+      animation-duration: 30s;
+      animation-delay: -5s;
+    }
+    .blob-3 {
+      width: 400px;
+      height: 400px;
+      background: #e8e4ff;
+      top: 30%;
+      left: 25%;
+      animation-duration: 35s;
+      animation-delay: -10s;
+    }
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(50px, 80px) scale(1.15); }
+      100% { transform: translate(-30px, -50px) scale(0.9); }
     }
     
     /* Navigation Bar */
@@ -32,11 +84,11 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(251, 250, 247, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(251, 250, 247, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-color);
-      padding: 16px 24px;
+      padding: 20px 32px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -44,24 +96,24 @@
     .nav-logo {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 20px;
       color: var(--text-dark);
       text-decoration: none;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
     .nav-logo span { color: var(--sakura-primary); }
     .nav-links {
       display: flex;
-      gap: 24px;
+      gap: 28px;
     }
     .nav-links a {
       color: var(--text-muted);
       text-decoration: none;
       font-size: 14px;
-      font-weight: 500;
-      transition: color 0.2s;
+      font-weight: 600;
+      transition: all 0.2s;
     }
     .nav-links a:hover {
       color: var(--sakura-deep);
@@ -69,17 +121,16 @@
     
     /* Hero Section */
     .hero {
-      padding: 100px 24px 70px;
+      padding: 120px 24px 80px;
       text-align: center;
-      background: radial-gradient(circle at top, #fff3f6 0%, var(--bg-cream) 70%);
-      border-bottom: 1px solid var(--border-color);
+      position: relative;
     }
     .hero h1 {
-      font-size: 36px;
+      font-size: 44px;
       font-weight: 700;
       color: var(--text-dark);
-      letter-spacing: -0.01em;
-      line-height: 1.3;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
       margin-bottom: 8px;
     }
     
@@ -87,12 +138,21 @@
     .container {
       max-width: 800px;
       margin: 0 auto;
-      padding: 60px 24px 100px;
+      padding: 40px 24px 120px;
+    }
+    .legal-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 28px;
+      padding: 48px;
+      box-shadow: 0 10px 40px rgba(184, 59, 94, 0.02);
     }
     .meta-box {
       background: var(--sakura-light);
       border: 1px solid rgba(232, 114, 154, 0.15);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 24px;
       margin-bottom: 40px;
       font-size: 14px;
@@ -103,12 +163,15 @@
     }
     
     h2 {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
-      margin: 40px 0 16px;
+      margin: 44px 0 16px;
       color: var(--text-dark);
       border-bottom: 2px solid var(--sakura-light);
       padding-bottom: 8px;
+    }
+    h2:first-of-type {
+      margin-top: 0;
     }
     p {
       margin-bottom: 16px;
@@ -129,9 +192,10 @@
     
     /* Footer */
     .footer {
-      background: #faf9f6;
+      background: rgba(251, 250, 247, 0.5);
+      backdrop-filter: blur(10px);
       border-top: 1px solid var(--border-color);
-      padding: 40px 24px;
+      padding: 48px 24px;
       text-align: center;
       font-size: 13px;
       color: var(--text-muted);
@@ -139,7 +203,7 @@
     .footer a {
       color: var(--sakura-deep);
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
     }
     .footer a:hover {
       text-decoration: underline;
@@ -147,6 +211,12 @@
   </style>
 </head>
 <body>
+
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
 
 <header class="navbar">
   <a href="index.html" class="nav-logo">
@@ -163,96 +233,97 @@
 </section>
 
 <main class="container">
-  <div class="meta-box">
-    <strong>Effective Date:</strong> June 2026<br>
-    <strong>Developer:</strong> Meigaming<br>
-    <strong>Contact:</strong> <a href="mailto:meigaming.official@gmail.com" style="color: var(--sakura-deep); text-decoration: none;">meigaming.official@gmail.com</a>
+  <div class="legal-card">
+    <div class="meta-box">
+      <strong>Effective Date:</strong> June 2026<br>
+      <strong>Developer:</strong> Meigaming<br>
+      <strong>Contact:</strong> <a href="mailto:meigaming.official@gmail.com" style="color: var(--sakura-deep); text-decoration: none;">meigaming.official@gmail.com</a>
+    </div>
+
+    <h2>1. Introduction</h2>
+    <p>Mei Convertor ("the App") is a file conversion utility developed by Meigaming. This Privacy Policy explains how the App handles information related to its users.</p>
+    <p>By downloading or using the App, you acknowledge that you have read and understood this Privacy Policy.</p>
+
+    <h2>2. Information We Do Not Collect</h2>
+    <p>Mei Convertor is designed as a fully <strong>offline-first</strong> application.</p>
+    <ul>
+      <li><strong>No personal data is collected:</strong> We do not collect names, email addresses, phone numbers, or any device identifiers.</li>
+      <li><strong>No user accounts are required:</strong> You can use all features of the App without signing up or creating an account.</li>
+      <li><strong>No files are uploaded to any server:</strong> All files you process remain locally on your device.</li>
+      <li><strong>No analytics or tracking:</strong> We do not track your usage, behavior, or conversion history.</li>
+    </ul>
+
+    <h2>3. Data Deletion and Account Deletion Requests</h2>
+    <p>Because Mei Convertor does not collect, store, or transmit any user data or require user account creation:</p>
+    <ul>
+      <li><strong>No server-side data exists to be deleted.</strong></li>
+      <li><strong>No account deletion requests are necessary.</strong></li>
+      <li><strong>All files are stored locally:</strong> If you wish to delete files converted using the App, you can simply delete the output files from your device's local storage using your device's built-in file manager.</li>
+    </ul>
+
+    <h2>4. File Processing</h2>
+    <p>Files you select for conversion are:</p>
+    <ul>
+      <li>Processed <strong>entirely on your device</strong> using local computation.</li>
+      <li>Never transmitted to, stored on, or accessible by any external server or third party.</li>
+      <li>Not retained by the App after conversion; output files are saved to your device's local storage at a path you can manage.</li>
+    </ul>
+    <p>You are solely responsible for the files you select and the outputs you generate.</p>
+
+    <h2>5. Permissions</h2>
+    <p>The App may request the following device permissions to enable core functionality:</p>
+    <ul>
+      <li><strong>Storage / Files:</strong> Required to read source files and save converted output files to your device's local storage.</li>
+      <li><strong>Media (Android 13+):</strong> Required to access and select image files for conversion.</li>
+    </ul>
+    <p>These permissions are used solely to perform local conversions and are not utilized for any other purpose.</p>
+
+    <h2>6. Third-Party Libraries</h2>
+    <p>The App uses the following open-source libraries for local, on-device processing:</p>
+    <ul>
+      <li><strong>syncfusion_flutter_pdf</strong> — PDF merge and split (processed locally)</li>
+      <li><strong>archive</strong> — ZIP/DOCX reading and writing (processed locally)</li>
+      <li><strong>flutter_image_compress</strong> — Image compression (processed locally)</li>
+    </ul>
+    <p>None of these libraries transmit data externally.</p>
+
+    <h2>7. Children's Privacy</h2>
+    <p>The App is not directed at children under the age of <strong>13</strong>. We do not knowingly collect personal information from children. If you believe a child has provided information through the App, please contact us at meigaming.official@gmail.com so we can address the concern.</p>
+
+    <h2>8. GDPR &amp; CCPA Compliance</h2>
+    <p>Because Mei Convertor does not collect, process, or store any personal data, the App is inherently compliant with the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).</p>
+    <ul>
+      <li>No data subject access requests are required, as no personal data is held.</li>
+      <li>No "Do Not Sell My Personal Information" mechanism is required, as no data is sold or shared.</li>
+      <li>No consent management or cookie banners are needed, as no tracking occurs.</li>
+    </ul>
+
+    <h2>9. Data Security</h2>
+    <p>Because all file processing occurs on-device and no data is transmitted externally, the primary security responsibility rests with your device's operating system and your own file management practices. We recommend:</p>
+    <ul>
+      <li>Keeping your device OS and security patches up to date.</li>
+      <li>Using device lock screens and encryption features provided by your operating system.</li>
+    </ul>
+
+    <h2>10. Advertising</h2>
+    <p>This version of the App <strong>does not display advertisements</strong>. If advertising is introduced in a future update, this Privacy Policy will be updated before such features go live, and users will be informed via the app store listing.</p>
+
+    <h2>11. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. Any changes will be:</p>
+    <ul>
+      <li>Reflected with an updated <strong>Effective Date</strong> at the top of this document.</li>
+      <li>Published within the app store listing for the App.</li>
+    </ul>
+    <p>Continued use of the App after a policy update constitutes acceptance of the revised policy.</p>
+
+    <h2>12. Contact Us</h2>
+    <p>If you have questions, concerns, or requests related to this Privacy Policy, please contact:</p>
+    <p>
+      <strong>Developer:</strong> Meigaming<br>
+      <strong>Email:</strong> meigaming.official@gmail.com<br>
+      <strong>App:</strong> Mei Convertor (com.meigaming.meiconvertor)
+    </p>
   </div>
-
-  <h2>1. Introduction</h2>
-  <p>Mei Convertor ("the App") is a file conversion utility developed by Meigaming. This Privacy Policy explains how the App handles information related to its users.</p>
-  <p>By downloading or using the App, you acknowledge that you have read and understood this Privacy Policy.</p>
-
-  <h2>2. Information We Do Not Collect</h2>
-  <p>Mei Convertor is designed as a fully <strong>offline-first</strong> application.</p>
-  <ul>
-    <li><strong>No personal data is collected:</strong> We do not collect names, email addresses, phone numbers, or any device identifiers.</li>
-    <li><strong>No user accounts are required:</strong> You can use all features of the App without signing up or creating an account.</li>
-    <li><strong>No files are uploaded to any server:</strong> All files you process remain locally on your device.</li>
-    <li><strong>No analytics or tracking:</strong> We do not track your usage, behavior, or conversion history.</li>
-  </ul>
-
-  <h2>3. Data Deletion and Account Deletion Requests</h2>
-  <p>Because Mei Convertor does not collect, store, or transmit any user data or require user account creation:</p>
-  <ul>
-    <li><strong>No server-side data exists to be deleted.</strong></li>
-    <li><strong>No account deletion requests are necessary.</strong></li>
-    <li><strong>All files are stored locally:</strong> If you wish to delete files converted using the App, you can simply delete the output files from your device's local storage using your device's built-in file manager.</li>
-  </ul>
-
-  <h2>4. File Processing</h2>
-  <p>Files you select for conversion are:</p>
-  <ul>
-    <li>Processed <strong>entirely on your device</strong> using local computation.</li>
-    <li>Never transmitted to, stored on, or accessible by any external server or third party.</li>
-    <li>Not retained by the App after conversion; output files are saved to your device's local storage at a path you can manage.</li>
-  </ul>
-  <p>You are solely responsible for the files you select and the outputs you generate.</p>
-
-  <h2>5. Permissions</h2>
-  <p>The App may request the following device permissions to enable core functionality:</p>
-  <ul>
-    <li><strong>Storage / Files:</strong> Required to read source files and save converted output files to your device's local storage.</li>
-    <li><strong>Media (Android 13+):</strong> Required to access and select image files for conversion.</li>
-  </ul>
-  <p>These permissions are used solely to perform local conversions and are not utilized for any other purpose.</p>
-
-  <h2>6. Third-Party Libraries</h2>
-  <p>The App uses the following open-source libraries for local, on-device processing:</p>
-  <ul>
-    <li><strong>syncfusion_flutter_pdf</strong> — PDF merge and split (processed locally)</li>
-    <li><strong>archive</strong> — ZIP/DOCX reading and writing (processed locally)</li>
-    <li><strong>flutter_image_compress</strong> — Image compression (processed locally)</li>
-  </ul>
-  <p>None of these libraries transmit data externally.</p>
-
-  <h2>7. Children's Privacy</h2>
-  <p>The App is not directed at children under the age of <strong>13</strong>. We do not knowingly collect personal information from children. If you believe a child has provided information through the App, please contact us at meigaming.official@gmail.com so we can address the concern.</p>
-
-  <h2>8. GDPR &amp; CCPA Compliance</h2>
-  <p>Because Mei Convertor does not collect, process, or store any personal data, the App is inherently compliant with the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).</p>
-  <ul>
-    <li>No data subject access requests are required, as no personal data is held.</li>
-    <li>No "Do Not Sell My Personal Information" mechanism is required, as no data is sold or shared.</li>
-    <li>No consent management or cookie banners are needed, as no tracking occurs.</li>
-  </ul>
-
-  <h2>9. Data Security</h2>
-  <p>Because all file processing occurs on-device and no data is transmitted externally, the primary security responsibility rests with your device's operating system and your own file management practices. We recommend:</p>
-  <ul>
-    <li>Keeping your device OS and security patches up to date.</li>
-    <li>Using device lock screens and encryption features provided by your operating system.</li>
-  </ul>
-
-  <h2>10. Advertising</h2>
-  <p>This version of the App <strong>does not display advertisements</strong>. If advertising is introduced in a future update, this Privacy Policy will be updated before such features go live, and users will be informed via the app store listing.</p>
-
-  <h2>11. Changes to This Policy</h2>
-  <p>We may update this Privacy Policy from time to time. Any changes will be:</p>
-  <ul>
-    <li>Reflected with an updated <strong>Effective Date</strong> at the top of this document.</li>
-    <li>Published within the app store listing for the App.</li>
-  </ul>
-  <p>Continued use of the App after a policy update constitutes acceptance of the revised policy.</p>
-
-  <h2>12. Contact Us</h2>
-  <p>If you have questions, concerns, or requests related to this Privacy Policy, please contact:</p>
-  <p>
-    <strong>Developer:</strong> Meigaming<br>
-    <strong>Email:</strong> meigaming.official@gmail.com<br>
-    <strong>App:</strong> Mei Convertor (com.meigaming.meiconvertor)
-  </p>
-
 </main>
 
 <footer class="footer">
