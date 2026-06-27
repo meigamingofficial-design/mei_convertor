@@ -122,4 +122,17 @@ class SharingService {
     }
     return out;
   }
+
+  /// Launch a URL in the default system browser.
+  static Future<void> openUrl(String url) async {
+    try {
+      if (Platform.isAndroid) {
+        await _channel.invokeMethod('openUrl', {'url': url});
+      } else {
+        MeiLogger.instance.w('openUrl is not supported on this platform: $url');
+      }
+    } catch (e, st) {
+      MeiLogger.instance.e('openUrl failed', e, st);
+    }
+  }
 }

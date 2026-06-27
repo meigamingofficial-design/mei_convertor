@@ -6,6 +6,7 @@ import 'package:gap/gap.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/providers/package_info_provider.dart';
+import '../../../core/services/sharing/sharing_service.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/mei_card.dart';
 
@@ -190,6 +191,15 @@ class SettingsScreen extends ConsumerWidget {
                       applicationName: ref.tr('app_name'),
                       applicationVersion: '${packageInfo.version} (${packageInfo.buildNumber})',
                       applicationLegalese: '© 2026 ${ref.tr('settings_dev_value')}',
+                    ),
+                  ),
+                  const Divider(indent: 56),
+                  ListTile(
+                    leading: const Icon(Icons.language_rounded, color: MeiColors.sakuraDeep),
+                    title: Text(_getWebsiteTitle(currentLang)),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                    onTap: () => SharingService.openUrl(
+                      'https://meigamingofficial-design.github.io/mei_convertor/',
                     ),
                   ),
                 ],
@@ -497,5 +507,18 @@ class _MeiMarkdownViewer extends ConsumerWidget {
     }
 
     return spans;
+  }
+}
+
+String _getWebsiteTitle(AppLanguage lang) {
+  switch (lang) {
+    case AppLanguage.ja: return '公式サイト';
+    case AppLanguage.ta: return 'அதிகாரப்பூர்வ வலைத்தளம்';
+    case AppLanguage.es: return 'Sitio web oficial';
+    case AppLanguage.pl: return 'Oficjalna strona internetowa';
+    case AppLanguage.zh: return '官方网站';
+    case AppLanguage.ko: return '공식 웹사이트';
+    case AppLanguage.tl: return 'Opisyal na Website';
+    default: return 'Official Website';
   }
 }

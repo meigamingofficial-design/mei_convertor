@@ -43,6 +43,11 @@ class MainActivity : FlutterActivity() {
                         if (path != null) openFolder(path, result)
                         else result.error("INVALID_ARG", "path is null", null)
                     }
+                    "openUrl" -> {
+                        val url = call.argument<String>("url")
+                        if (url != null) openUrl(url, result)
+                        else result.error("INVALID_ARG", "url is null", null)
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -224,6 +229,18 @@ class MainActivity : FlutterActivity() {
             }
         } catch (e: Exception) {
             result.error("CRITICAL_ERROR", e.message, null)
+        }
+    }
+
+    private fun openUrl(url: String, result: MethodChannel.Result) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+            result.success(true)
+        } catch (e: Exception) {
+            result.error("OPEN_URL_FAILED", "Could not open URL: ${e.message}", null)
         }
     }
 }
