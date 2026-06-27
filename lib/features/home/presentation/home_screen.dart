@@ -8,12 +8,13 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/theme.dart';
 import '../../../routing/app_router.dart';
+import '../../recent_files/providers/history_provider.dart';
 import '../widgets/home_feature_grid.dart';
 import '../widgets/home_greeting_header.dart';
 import '../widgets/home_quick_convert_hero.dart';
 import '../widgets/home_recent_files_section.dart';
 
-/// Main home screen — the entry point of Mei Convertor
+/// Main home screen — the entry point of Mei Converter
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -85,7 +86,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   pinned: false,
                   floating: true,
                   snap: true,
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: MeiColors.offWhite,
+                  surfaceTintColor: MeiColors.offWhite,
                   elevation: 0,
                   scrolledUnderElevation: 0,
                   toolbarHeight: 64,
@@ -120,7 +122,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title: ref.tr('home_section_tools'),
                         trailing: TextButton(
                           onPressed: () => context.push(MeiRoutes.allTools),
-                          child: Text(ref.tr('home_view_all')),
+                          style: TextButton.styleFrom(
+                            foregroundColor: MeiColors.sakuraDeep,
+                            textStyle: MeiTextStyles.labelMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          ),
+                          child: Text(ref.tr('home_more_tools')),
                         ),
                       ),
                       const Gap(MeiSpacing.md),
@@ -130,10 +139,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       // Recent Files
                       _SectionHeader(
                         title: ref.tr('home_section_recent'),
-                        trailing: TextButton(
-                          onPressed: () => context.push(MeiRoutes.recentFiles),
-                          child: Text(ref.tr('home_see_all')),
-                        ),
+                        trailing: ref.watch(historyProvider).maybeWhen(
+                              data: (records) => records.isNotEmpty
+                                  ? TextButton(
+                                      onPressed: () => context.push(MeiRoutes.recentFiles),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: MeiColors.sakuraDeep,
+                                        textStyle: MeiTextStyles.labelMedium.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      ),
+                                      child: Text(ref.tr('home_see_all')),
+                                    )
+                                  : null,
+                              orElse: () => null,
+                            ),
                       ),
                       const Gap(MeiSpacing.md),
                       const HomeRecentFilesSection(),

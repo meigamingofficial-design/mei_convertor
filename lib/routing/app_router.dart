@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,13 +23,13 @@ abstract final class MeiRoutes {
   static const String settings = '/settings';
 }
 
-/// Mei Convertor app router using GoRouter
+/// Mei Converter app router using GoRouter
 final class AppRouter {
   AppRouter._();
 
   static final GoRouter router = GoRouter(
     initialLocation: MeiRoutes.home,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     routes: [
       GoRoute(
         path: MeiRoutes.home,

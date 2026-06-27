@@ -79,7 +79,7 @@ class _QuickConvertScreenState extends ConsumerState<QuickConvertScreen> {
                         type: FileType.custom,
                         allowedExtensions: const [
                           'jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif', 'heic',
-                          'pdf', 'txt', 'docx', 'doc',
+                          'txt', 'docx', 'doc',
                         ],
                       );
                       if (result?.paths.isNotEmpty == true) {
@@ -99,7 +99,7 @@ class _QuickConvertScreenState extends ConsumerState<QuickConvertScreen> {
                         type: FileType.custom,
                         allowedExtensions: const [
                           'jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif', 'heic',
-                          'pdf', 'txt', 'docx', 'doc',
+                          'txt', 'docx', 'doc',
                         ],
                       );
                       if (result?.paths.isNotEmpty == true) {
@@ -113,14 +113,16 @@ class _QuickConvertScreenState extends ConsumerState<QuickConvertScreen> {
                     const Gap(MeiSpacing.xl),
                     _FileInfoCard(
                         fileType: detectedType, filePath: state.sourcePath!),
-                    const Gap(MeiSpacing.xl),
-                    _ConversionSelector(
-                      fileType: detectedType,
-                      selected: selectedConversion,
-                      onSelected: (conversion) {
-                        notifier.setTargetFormat(conversion);
-                      },
-                    ),
+                    if (!done) ...[
+                      const Gap(MeiSpacing.xl),
+                      _ConversionSelector(
+                        fileType: detectedType,
+                        selected: selectedConversion,
+                        onSelected: (conversion) {
+                          notifier.setTargetFormat(conversion);
+                        },
+                      ),
+                    ],
                   ],
                 ],
 
@@ -663,6 +665,8 @@ class _SuccessCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fileName = outputPath.split('/').last;
+    final origFmt = sourcePath.split('.').last.toUpperCase();
+    final outFmt = outputPath.split('.').last.toUpperCase();
 
     int originalSize = 0;
     int convertedSize = 0;
@@ -717,8 +721,14 @@ class _SuccessCard extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _StatItem(label: ref.tr('original_size'), value: _formatSize(originalSize)),
-              _StatItem(label: ref.tr('new_size'), value: _formatSize(convertedSize)),
+              _StatItem(
+                label: ref.tr('original_format').replaceAll('{format}', origFmt),
+                value: _formatSize(originalSize),
+              ),
+              _StatItem(
+                label: ref.tr('output_format').replaceAll('{format}', outFmt),
+                value: _formatSize(convertedSize),
+              ),
               if (spaceSaved > 0)
                 _StatItem(label: ref.tr('space_saved'), value: '$spaceSaved%'),
             ],
@@ -767,7 +777,7 @@ class _SuccessCard extends ConsumerWidget {
             child: OutlinedButton.icon(
               onPressed: () async {
                 final dir = await FileUtils.outputDir();
-                await SharingService.openFile(dir.path);
+                await SharingService.openFolder(dir.path);
               },
               icon: const Icon(Icons.folder_open_rounded, size: 16),
               label: Text(ref.tr('open_folder')),
@@ -776,8 +786,14 @@ class _SuccessCard extends ConsumerWidget {
           const Gap(MeiSpacing.sm),
           Align(
             alignment: Alignment.center,
-            child: TextButton(
+            child: OutlinedButton(
               onPressed: onReset,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: MeiColors.sakuraDeep,
+                side: const BorderSide(color: MeiColors.sakuraDeep, width: 1.5),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
               child: Text(ref.tr('convert_another_file')),
             ),
           ),

@@ -13,14 +13,55 @@ class HomeFeatureGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: MeiSpacing.md,
-      mainAxisSpacing: MeiSpacing.md,
-      childAspectRatio: 0.98,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // 1. Row containing PDF Tools and Documents side-by-side (on top)
+        Row(
+          children: [
+            Expanded(
+              child: AspectRatio(
+                aspectRatio: 1.03,
+                child: MeiFeatureTile(
+                  icon: Icons.picture_as_pdf_rounded,
+                  title: ref.tr('all_tools_pdf_title'),
+                  subtitle: ref.tr('home_tile_pdf_sub'),
+                  accentColor: MeiColors.pdfRedDeep,
+                  accentBackground: MeiColors.pdfRedLight,
+                  badge: 'PDF',
+                  onTap: () => context.push(MeiRoutes.pdfTools),
+                ).animate(delay: 300.ms).fadeIn(duration: 400.ms).slideY(
+                      begin: 0.1,
+                      end: 0,
+                      duration: 400.ms,
+                      curve: Curves.easeOutCubic,
+                    ),
+              ),
+            ),
+            const SizedBox(width: MeiSpacing.md),
+            Expanded(
+              child: AspectRatio(
+                aspectRatio: 1.03,
+                child: MeiFeatureTile(
+                  icon: Icons.description_rounded,
+                  title: ref.tr('all_tools_doc_title'),
+                  subtitle: ref.tr('home_tile_doc_sub'),
+                  accentColor: MeiColors.docGreenDeep,
+                  accentBackground: MeiColors.docGreenLight,
+                  badge: 'TXT DOCX',
+                  onTap: () => context.push(MeiRoutes.documents),
+                ).animate(delay: 350.ms).fadeIn(duration: 400.ms).slideY(
+                      begin: 0.1,
+                      end: 0,
+                      duration: 400.ms,
+                      curve: Curves.easeOutCubic,
+                    ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: MeiSpacing.md),
+        // 2. Featured Full-Width Card (Image Tools) (at bottom)
         MeiFeatureTile(
           icon: Icons.image_rounded,
           title: ref.tr('all_tools_img_title'),
@@ -29,48 +70,7 @@ class HomeFeatureGrid extends ConsumerWidget {
           accentBackground: MeiColors.imageBlueLight,
           badge: 'JPG PNG WEBP',
           onTap: () => context.push(MeiRoutes.imageTools),
-        ).animate(delay: 300.ms).fadeIn(duration: 400.ms).slideY(
-              begin: 0.1,
-              end: 0,
-              duration: 400.ms,
-              curve: Curves.easeOutCubic,
-            ),
-        MeiFeatureTile(
-          icon: Icons.picture_as_pdf_rounded,
-          title: ref.tr('all_tools_pdf_title'),
-          subtitle: ref.tr('home_tile_pdf_sub'),
-          accentColor: MeiColors.pdfRedDeep,
-          accentBackground: MeiColors.pdfRedLight,
-          badge: 'PDF',
-          onTap: () => context.push(MeiRoutes.pdfTools),
-        ).animate(delay: 350.ms).fadeIn(duration: 400.ms).slideY(
-              begin: 0.1,
-              end: 0,
-              duration: 400.ms,
-              curve: Curves.easeOutCubic,
-            ),
-        MeiFeatureTile(
-          icon: Icons.description_rounded,
-          title: ref.tr('all_tools_doc_title'),
-          subtitle: ref.tr('home_tile_doc_sub'),
-          accentColor: MeiColors.docGreenDeep,
-          accentBackground: MeiColors.docGreenLight,
-          badge: 'TXT DOCX',
-          onTap: () => context.push(MeiRoutes.documents),
         ).animate(delay: 400.ms).fadeIn(duration: 400.ms).slideY(
-              begin: 0.1,
-              end: 0,
-              duration: 400.ms,
-              curve: Curves.easeOutCubic,
-            ),
-        MeiFeatureTile(
-          icon: Icons.history_rounded,
-          title: ref.tr('recent_title'),
-          subtitle: ref.tr('home_tile_recent_sub'),
-          accentColor: MeiColors.convertPurpleDeep,
-          accentBackground: MeiColors.convertPurpleLight,
-          onTap: () => context.push(MeiRoutes.recentFiles),
-        ).animate(delay: 450.ms).fadeIn(duration: 400.ms).slideY(
               begin: 0.1,
               end: 0,
               duration: 400.ms,

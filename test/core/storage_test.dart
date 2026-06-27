@@ -169,5 +169,13 @@ void main() {
       final records = await StorageService.getAllRecords();
       expect(records, isEmpty);
     });
+
+    test('getBool and setBool persist boolean values', () async {
+      expect(StorageService.getBool('test_bool'), isNull);
+      await StorageService.setBool('test_bool', true);
+      expect(StorageService.getBool('test_bool'), isTrue);
+      await StorageService.setBool('test_bool', false);
+      expect(StorageService.getBool('test_bool'), isFalse);
+    });
   });
 }

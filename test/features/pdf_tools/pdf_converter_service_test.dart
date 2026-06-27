@@ -13,7 +13,7 @@ void main() {
   // ── PdfToolsState defaults ────────────────────────────────────────────────
 
   group('PdfToolsState — defaults', () {
-    const state = PdfToolsState();
+    final state = PdfToolsState();
 
     test('default tab is imagesToPdf', () {
       expect(state.tab, PdfToolsTab.imagesToPdf);
@@ -39,17 +39,13 @@ void main() {
       expect(state.splitToPage, 1);
     });
 
-    test('compressionQuality defaults to 60', () {
-      expect(state.compressionQuality, 60);
-    });
+
 
     test('hasFiles is false initially', () {
       expect(state.hasFiles, isFalse);
     });
 
-    test('hasPdf is false initially', () {
-      expect(state.hasPdf, isFalse);
-    });
+
 
     test('hasMergePdfs is false initially', () {
       expect(state.hasMergePdfs, isFalse);
@@ -67,7 +63,7 @@ void main() {
   // ── PdfToolsState.copyWith ────────────────────────────────────────────────
 
   group('PdfToolsState.copyWith', () {
-    const base = PdfToolsState();
+    final base = PdfToolsState();
 
     test('copyWith tab', () {
       final s = base.copyWith(tab: PdfToolsTab.mergePdfs);
@@ -99,16 +95,7 @@ void main() {
       expect(s.splitTotalPages, 10);
     });
 
-    test('copyWith pdfSourcePath', () {
-      final s = base.copyWith(pdfSourcePath: '/doc.pdf');
-      expect(s.pdfSourcePath, '/doc.pdf');
-      expect(s.hasPdf, isTrue);
-    });
 
-    test('copyWith compressionQuality', () {
-      final s = base.copyWith(compressionQuality: 80);
-      expect(s.compressionQuality, 80);
-    });
 
     test('copyWith splitFromPage and splitToPage', () {
       final s =
@@ -133,7 +120,7 @@ void main() {
 
   group('PdfToolsState.forTab', () {
     test('forTab creates fresh state for the given tab', () {
-      const dirty = PdfToolsState(
+      final dirty = PdfToolsState(
         tab: PdfToolsTab.imagesToPdf,
         status: PdfToolsStatus.done,
         outputPath: '/some/path.pdf',
@@ -150,14 +137,14 @@ void main() {
 
   group('PdfToolsState — computed helpers', () {
     test('hasFiles is true when sourcePaths is non-empty', () {
-      final s = const PdfToolsState().copyWith(sourcePaths: ['/a.jpg']);
+      final s = PdfToolsState().copyWith(sourcePaths: ['/a.jpg']);
       expect(s.hasFiles, isTrue);
     });
 
     test('hasMergePdfs is true only when >= 2 paths', () {
-      final one = const PdfToolsState()
+      final one = PdfToolsState()
           .copyWith(mergePdfPaths: ['/a.pdf']);
-      final two = const PdfToolsState()
+      final two = PdfToolsState()
           .copyWith(mergePdfPaths: ['/a.pdf', '/b.pdf']);
       expect(one.hasMergePdfs, isFalse);
       expect(two.hasMergePdfs, isTrue);
@@ -165,15 +152,15 @@ void main() {
 
     test('isBusy is true only when status is converting', () {
       final converting =
-          const PdfToolsState().copyWith(status: PdfToolsStatus.converting);
+          PdfToolsState().copyWith(status: PdfToolsStatus.converting);
       final done =
-          const PdfToolsState().copyWith(status: PdfToolsStatus.done);
+          PdfToolsState().copyWith(status: PdfToolsStatus.done);
       expect(converting.isBusy, isTrue);
       expect(done.isBusy, isFalse);
     });
 
     test('hasSplitSource is true when splitSourcePath is set', () {
-      final s = const PdfToolsState().copyWith(splitSourcePath: '/doc.pdf');
+      final s = PdfToolsState().copyWith(splitSourcePath: '/doc.pdf');
       expect(s.hasSplitSource, isTrue);
     });
   });
@@ -273,16 +260,15 @@ void main() {
   // ── PdfToolsTab enum ──────────────────────────────────────────────────────
 
   group('PdfToolsTab enum', () {
-    test('contains exactly 4 values', () {
-      expect(PdfToolsTab.values.length, 4);
+    test('contains exactly 3 values', () {
+      expect(PdfToolsTab.values.length, 3);
     });
 
-    test('values are imagesToPdf, compress, mergePdfs, splitPdf', () {
+    test('values are imagesToPdf, mergePdfs, splitPdf', () {
       expect(
         PdfToolsTab.values,
         containsAll([
           PdfToolsTab.imagesToPdf,
-          PdfToolsTab.compress,
           PdfToolsTab.mergePdfs,
           PdfToolsTab.splitPdf,
         ]),

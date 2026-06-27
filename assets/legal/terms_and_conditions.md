@@ -123,7 +123,7 @@ We reserve the right to discontinue the App at any time without notice. Upon dis
 
 ## 12. Governing Law
 
-These Terms are governed by the laws of the jurisdiction in which Meigaming operates, without regard to conflict-of-law principles. Any disputes shall be resolved in the appropriate courts of that jurisdiction.
+These Terms are governed by and construed in accordance with the laws of India, without regard to conflict-of-law principles. Any disputes arising from or relating to these Terms shall be subject to the exclusive jurisdiction of the courts located in India.
 
 ---
 

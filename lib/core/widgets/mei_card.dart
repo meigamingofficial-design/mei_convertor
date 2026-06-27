@@ -108,11 +108,8 @@ class MeiHeroCard extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     Color(0xFFCE5580), // deep sakura
-                    Color(0xFFAA5AA8), // violet-pink
                     Color(0xFF7B70C0), // lavender
-                    Color(0xFF5B8FC8), // sky
                   ],
-                  stops: [0.0, 0.33, 0.66, 1.0],
                 ),
             borderRadius: effectiveBorderRadius,
             boxShadow: const [
@@ -229,7 +226,7 @@ class _MeiFeatureTileState extends State<MeiFeatureTile> {
         curve: Curves.easeOutCubic,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 130),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -268,90 +265,108 @@ class _MeiFeatureTileState extends State<MeiFeatureTile> {
                     ),
                   ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              // Top row: icon + badge
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          widget.accentColor,
-                          widget.accentColor.withValues(alpha: 0.78),
-                        ],
-                      ),
-                      borderRadius: MeiRadius.mdAll,
-                      boxShadow: [
-                        BoxShadow(
-                          color: widget.accentColor.withValues(alpha: 0.38),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                  // Top row: icon + badge
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              widget.accentColor,
+                              widget.accentColor.withValues(alpha: 0.78),
+                            ],
+                          ),
+                          borderRadius: MeiRadius.mdAll,
+                          boxShadow: [
+                            BoxShadow(
+                              color: widget.accentColor.withValues(alpha: 0.38),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Icon(
-                      widget.icon,
-                      color: Colors.white,
-                      size: 22,
+                        child: Icon(
+                          widget.icon,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                      if (widget.badge != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: widget.badge!.split(' ').map((format) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 2.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 4.0,
+                                    height: 4.0,
+                                    decoration: BoxDecoration(
+                                      color: widget.accentColor.withValues(alpha: 0.7),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    format,
+                                    style: MeiTextStyles.labelSmall.copyWith(
+                                      color: widget.accentColor,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 9,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.title,
+                    style: MeiTextStyles.titleLarge.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: MeiColors.textPrimary,
                     ),
                   ),
-                  if (widget.badge != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: widget.accentColor.withValues(alpha: 0.12),
-                        borderRadius: MeiRadius.fullAll,
-                        border: Border.all(
-                          color: widget.accentColor.withValues(alpha: 0.22),
-                          width: 1,
-                        ),
+                  const SizedBox(height: 2),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 24.0), // Prevent description text overlapping the arrow
+                    child: Text(
+                      widget.subtitle,
+                      style: MeiTextStyles.bodySmall.copyWith(
+                        color: MeiColors.textSecondary,
+                        height: 1.35,
                       ),
-                      child: Text(
-                        widget.badge!,
-                        style: MeiTextStyles.labelSmall.copyWith(
-                          color: widget.accentColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 9,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
                 ],
               ),
-              const SizedBox(height: MeiSpacing.md),
-              Text(
-                widget.title,
-                style: MeiTextStyles.titleLarge.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: MeiColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Expanded(
-                child: Text(
-                  widget.subtitle,
-                  style: MeiTextStyles.bodySmall.copyWith(
-                    color: MeiColors.textSecondary,
-                    height: 1.35,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
               // Arrow affordance
-              Align(
-                alignment: Alignment.bottomRight,
+              Positioned(
+                bottom: 0,
+                right: 0,
                 child: Container(
-                  width: 26,
-                  height: 26,
+                  width: 22,
+                  height: 22,
                   decoration: BoxDecoration(
                     color: widget.accentColor.withValues(alpha: 0.12),
                     borderRadius: MeiRadius.fullAll,
@@ -359,7 +374,7 @@ class _MeiFeatureTileState extends State<MeiFeatureTile> {
                   child: Icon(
                     Icons.arrow_forward_rounded,
                     color: widget.accentColor,
-                    size: 14,
+                    size: 12,
                   ),
                 ),
               ),

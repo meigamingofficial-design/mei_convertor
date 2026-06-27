@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
 /// Structured logging service for Mei Convertor
@@ -20,7 +21,7 @@ final class MeiLogger {
       printEmojis: true,
       dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
     ),
-    level: Level.debug,
+    level: kDebugMode ? Level.debug : Level.warning,
   );
 
   void d(String message, [Object? error, StackTrace? stackTrace]) {

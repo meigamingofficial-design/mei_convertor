@@ -20,6 +20,13 @@ class StorageService {
   static Future<void> setString(String key, String value) async =>
       await _prefs?.setString(key, value);
 
+  /// Get boolean preference.
+  static bool? getBool(String key) => _prefs?.getBool(key);
+
+  /// Set boolean preference.
+  static Future<void> setBool(String key, bool value) async =>
+      await _prefs?.setBool(key, value);
+
   /// Initialize the storage layer. Must be called once at startup.
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();

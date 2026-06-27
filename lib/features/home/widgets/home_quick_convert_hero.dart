@@ -101,6 +101,27 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
           const Gap(MeiSpacing.lg),
 
           if (state.sourcePath == null) ...[
+            // Beautiful branding section
+            Text(
+              ref.tr('app_name'),
+              style: MeiTextStyles.headlineSmall.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const Gap(4),
+            Text(
+              ref.tr('settings_sub'),
+              style: MeiTextStyles.labelSmall.copyWith(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const Gap(MeiSpacing.lg),
+
             // Drop zone/Selector when no file is picked
             GestureDetector(
               onTapDown: (_) => setState(() => _pressed = true),
@@ -404,12 +425,15 @@ class _HomeQuickConvertHeroState extends ConsumerState<HomeQuickConvertHero> {
                       ],
                     ),
                     const Gap(MeiSpacing.sm),
-                    TextButton(
+                    OutlinedButton(
                       onPressed: notifier.reset,
-                      child: Text(
-                        ref.tr('convert_another_file'),
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.80)),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: BorderSide(color: Colors.white.withValues(alpha: 0.60), width: 1.5),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
+                      child: Text(ref.tr('convert_another_file')),
                     ),
                   ],
                 ),

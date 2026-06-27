@@ -49,7 +49,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   @override
   void initState() {
     super.initState();
-    final initialIndex = _tabIndexFor(widget.initialTabName);
+    final providerTab = ref.read(documentsProvider).tab;
+    final initialIndex = widget.initialTabName != null
+        ? _tabIndexFor(widget.initialTabName)
+        : providerTab.index;
     _tabController = TabController(
       length: 2,
       vsync: this,
@@ -144,9 +147,10 @@ class _ConvertTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state    = ref.watch(documentsProvider);
     final notifier = ref.read(documentsProvider.notifier);
-
-    // Only show results/errors that belong to this tab's current state
-    final isActive = state.tab == targetFormat;
+    final tabState = _isPdf ? state.pdfState : state.docxState;
+    final hasFile  = tabState.selectedPath != null;
+    final isBusy   = tabState.status == DocumentsStatus.converting;
+    final fileName = tabState.selectedPath?.split('/').last ?? '';
 
     return SingleChildScrollView(
       padding: MeiSpacing.pageInsets,
@@ -157,7 +161,7 @@ class _ConvertTab extends ConsumerWidget {
         children: [
           const Gap(MeiSpacing.lg),
 
-          if (!state.hasFile)
+          if (!hasFile)
             MeiEmptyState(
               icon: _icon,
               title: _isPdf
@@ -207,14 +211,14 @@ class _ConvertTab extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              state.fileName,
+                              fileName,
                               style: MeiTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w600),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const Gap(2),
                             Text(
-                              _getFileSize(state.selectedPath!),
+                              _getFileSize(tabState.selectedPath!),
                               style: MeiTextStyles.bodySmall,
                             ),
                           ],
@@ -250,7 +254,7 @@ class _ConvertTab extends ConsumerWidget {
               ),
             ),
 
-            if (state.previewLines.isNotEmpty && state.status != DocumentsStatus.done) ...[
+            if (tabState.previewLines.isNotEmpty && tabState.status != DocumentsStatus.done) ...[
               const Gap(MeiSpacing.xxl),
               Text(ref.tr('preview'), style: MeiTextStyles.headlineSmall),
               const Gap(MeiSpacing.md),
@@ -259,7 +263,7 @@ class _ConvertTab extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ...state.previewLines.take(15).map(
+                    ...tabState.previewLines.take(15).map(
                           (line) => Padding(
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text(
@@ -272,9 +276,9 @@ class _ConvertTab extends ConsumerWidget {
                             ),
                           ),
                         ),
-                    if (state.previewLines.length > 15)
+                    if (tabState.previewLines.length > 15)
                       Text(
-                        ref.tr('doc_preview_more').replaceAll('{count}', '${state.previewLines.length - 15}'),
+                        ref.tr('doc_preview_more').replaceAll('{count}', '${tabState.previewLines.length - 15}'),
                         style: MeiTextStyles.labelSmall
                             .copyWith(color: MeiColors.textTertiary),
                       ),
@@ -286,43 +290,41 @@ class _ConvertTab extends ConsumerWidget {
             const Gap(MeiSpacing.xxl),
 
             // ── Convert button ────────────────────────────────────────────
-            if (state.status != DocumentsStatus.done)
+            if (tabState.status != DocumentsStatus.done)
               MeiButton(
-                label: state.isBusy
+                label: isBusy
                     ? ref.tr('doc_label_converting_to').replaceAll('{format}', _label)
                     : (_isPdf ? ref.tr('doc_btn_convert_pdf') : ref.tr('doc_btn_convert_docx')),
                 icon: _icon,
-                onPressed: state.isBusy
+                onPressed: isBusy
                     ? null
                     : (_isPdf ? notifier.convertToPdf : notifier.convertToDocx),
-                isLoading: state.isBusy,
+                isLoading: isBusy,
                 width: double.infinity,
                 backgroundColor: MeiColors.docGreenDeep,
               ),
           ],
 
           // ── Progress ────────────────────────────────────────────────────
-          if (state.isBusy && isActive)
+          if (isBusy)
             const Padding(
               padding: EdgeInsets.only(top: MeiSpacing.lg),
               child: LinearProgressIndicator(),
             ),
 
           // ── Result ──────────────────────────────────────────────────────
-          if (isActive &&
-              state.status == DocumentsStatus.done &&
-              state.outputPath != null)
+          if (tabState.status == DocumentsStatus.done &&
+              tabState.outputPath != null)
             _ResultCard(
-              outputPath: state.outputPath!,
+              outputPath: tabState.outputPath!,
               label: _label,
               onReset: notifier.convertAnother,
-              inputPath: state.selectedPath!,
+              inputPath: tabState.selectedPath!,
             ),
 
           // ── Error ────────────────────────────────────────────────────────
-          if (isActive &&
-              state.status == DocumentsStatus.failed &&
-              state.failure != null)
+          if (tabState.status == DocumentsStatus.failed &&
+              tabState.failure != null)
             Padding(
               padding: const EdgeInsets.only(top: MeiSpacing.xxl),
               child: MeiCard(
@@ -334,7 +336,7 @@ class _ConvertTab extends ConsumerWidget {
                     const Gap(MeiSpacing.md),
                     Expanded(
                       child: Text(
-                        state.failure!.message,
+                        tabState.failure!.message,
                         style: MeiTextStyles.bodySmall
                             .copyWith(color: MeiColors.error),
                       ),
@@ -369,6 +371,8 @@ class _ResultCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fileName = outputPath.split('/').last;
+    final origFmt = inputPath.split('.').last.toUpperCase();
+    final outFmt = label.toUpperCase();
 
     int originalSize = 0;
     int convertedSize = 0;
@@ -432,8 +436,14 @@ class _ResultCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _StatItem(label: ref.tr('original_size'), value: _formatSize(originalSize)),
-                _StatItem(label: ref.tr('new_size'), value: _formatSize(convertedSize)),
+                _StatItem(
+                  label: ref.tr('original_format').replaceAll('{format}', origFmt),
+                  value: _formatSize(originalSize),
+                ),
+                _StatItem(
+                  label: ref.tr('output_format').replaceAll('{format}', outFmt),
+                  value: _formatSize(convertedSize),
+                ),
                 if (spaceSaved > 0)
                   _StatItem(label: ref.tr('space_saved'), value: '$spaceSaved%'),
               ],
@@ -488,7 +498,7 @@ class _ResultCard extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () async {
                   final dir = await FileUtils.outputDir();
-                  await SharingService.openFile(dir.path);
+                  await SharingService.openFolder(dir.path);
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: MeiColors.docGreenDeep,
@@ -501,10 +511,13 @@ class _ResultCard extends ConsumerWidget {
             const Gap(MeiSpacing.sm),
             Align(
               alignment: Alignment.center,
-              child: TextButton(
+              child: OutlinedButton(
                 onPressed: onReset,
-                style: TextButton.styleFrom(
+                style: OutlinedButton.styleFrom(
                   foregroundColor: MeiColors.docGreenDeep,
+                  side: const BorderSide(color: MeiColors.docGreenDeep, width: 1.5),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: Text(ref.tr('convert_another')),
               ),

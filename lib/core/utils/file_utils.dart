@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -12,15 +13,63 @@ class FileUtils {
   const FileUtils._();
 
   static final _log = MeiLogger.instance;
+  static const _channel = MethodChannel('com.meigaming.meiconvertor/files');
 
   // ── Directories ──────────────────────────────────────────────────────────
 
   /// Returns (and creates if needed) the app's output directory.
   static Future<Directory> outputDir() async {
     final base = await getApplicationDocumentsDirectory();
-    final dir = Directory(p.join(base.path, 'MeiConvertor', 'Output'));
+    final dir = Directory(p.join(base.path, 'MeiConvertor'));
     if (!dir.existsSync()) await dir.create(recursive: true);
     return dir;
+  }
+
+  /// Moves/saves a completed file to the public storage if on Android,
+  /// returning the final path.
+  static Future<String> moveToPublic(String internalPath) async {
+    if (Platform.isAndroid) {
+      try {
+        final file = File(internalPath);
+        if (!file.existsSync()) return internalPath;
+
+        final fileName = p.basename(internalPath);
+        final extension = p.extension(internalPath).replaceAll('.', '').toLowerCase();
+
+        // Determine mime type
+        String? mimeType;
+        if (extension == 'pdf') {
+          mimeType = 'application/pdf';
+        } else if (extension == 'jpg' || extension == 'jpeg') {
+          mimeType = 'image/jpeg';
+        } else if (extension == 'png') {
+          mimeType = 'image/png';
+        } else if (extension == 'webp') {
+          mimeType = 'image/webp';
+        } else if (extension == 'bmp') {
+          mimeType = 'image/bmp';
+        } else if (extension == 'docx') {
+          mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        } else if (extension == 'txt') {
+          mimeType = 'text/plain';
+        }
+
+        final String? publicPath = await _channel.invokeMethod<String>('saveFileToPublic', {
+          'tempPath': internalPath,
+          'fileName': fileName,
+          'mimeType': mimeType,
+        });
+
+        if (publicPath != null && publicPath.isNotEmpty) {
+          // Delete the temporary internal file
+          await deleteIfExists(internalPath);
+          return publicPath;
+        }
+      } catch (e) {
+        _log.e('Failed to save file to public storage: $e');
+      }
+    }
+    return internalPath;
   }
 
   /// Returns (and creates if needed) a temp scratch dir for in-progress work.

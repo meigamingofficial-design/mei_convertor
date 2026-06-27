@@ -16,7 +16,7 @@ class MeiConvertorApp extends ConsumerWidget {
     final language = ref.watch(localeProvider);
 
     return MaterialApp.router(
-      title: 'Mei Convertor',
+      title: 'Mei Converter',
       debugShowCheckedModeBanner: false,
 
       // Theme
@@ -35,7 +35,6 @@ class MeiConvertorApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      // Builder for system chrome and safe area
       builder: (context, child) {
         SystemChrome.setSystemUIOverlayStyle(
           const SystemUiOverlayStyle(
@@ -45,7 +44,13 @@ class MeiConvertorApp extends ConsumerWidget {
             systemNavigationBarIconBrightness: Brightness.dark,
           ),
         );
-        return child ?? const SizedBox.shrink();
+        final mediaQueryData = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQueryData.copyWith(
+            textScaler: TextScaler.noScaling,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
       },
     );
   }

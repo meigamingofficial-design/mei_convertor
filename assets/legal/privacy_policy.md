@@ -85,6 +85,16 @@ Because all file processing occurs on-device and no data is transmitted external
 
 ---
 
+## 8. GDPR & CCPA Compliance
+
+Because Mei Convertor does not collect, process, or store any personal data, the App is inherently compliant with the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).
+
+- No data subject access requests are required, as no personal data is held.
+- No "Do Not Sell My Personal Information" mechanism is required, as no data is sold or shared.
+- No consent management or cookie banners are needed, as no tracking occurs.
+
+---
+
 ## 9. Advertising
 
 This version of the App **does not display advertisements**. If advertising is introduced in a future update, this Privacy Policy will be updated before such features go live, and users will be informed via the app store listing.

@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/locale_provider.dart';
+import '../../../core/services/storage/storage_service.dart';
 import '../../../core/theme/theme.dart';
 import '../../../routing/app_router.dart';
 
@@ -46,6 +47,12 @@ class _AllToolsScreenState extends ConsumerState<AllToolsScreen> {
 
   final List<String> _categories = ['All', 'Image', 'PDF', 'Documents'];
 
+  @override
+  void initState() {
+    super.initState();
+    _isGridView = StorageService.getBool('all_tools_grid_view') ?? true;
+  }
+
   final List<ToolItem> _tools = const [
     ToolItem(
       icon: Icons.swap_horiz_rounded,
@@ -86,16 +93,6 @@ class _AllToolsScreenState extends ConsumerState<AllToolsScreen> {
       accentBackground: MeiColors.pdfRedLight,
       route: '${MeiRoutes.pdfTools}?tab=imagesToPdf',
       badge: 'IMAGES → PDF',
-    ),
-    ToolItem(
-      icon: Icons.compress_rounded,
-      titleKey: 'tool_compress_pdf_title',
-      descriptionKey: 'tool_compress_pdf_desc',
-      category: 'PDF',
-      accentColor: MeiColors.pdfRedDeep,
-      accentBackground: MeiColors.pdfRedLight,
-      route: '${MeiRoutes.pdfTools}?tab=compress',
-      badge: 'COMPRESS',
     ),
     ToolItem(
       icon: Icons.call_merge_rounded,
@@ -196,6 +193,7 @@ class _AllToolsScreenState extends ConsumerState<AllToolsScreen> {
             onPressed: () {
               setState(() {
                 _isGridView = !_isGridView;
+                StorageService.setBool('all_tools_grid_view', _isGridView);
               });
             },
           ),

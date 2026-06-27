@@ -358,6 +358,15 @@ class _RecordTile extends ConsumerWidget {
               },
             ),
             _OptionTile(
+              icon: Icons.folder_open_rounded,
+              label: ref.tr('open_folder'),
+              onTap: () {
+                ctx.pop();
+                final dirPath = record.outputPath.substring(0, record.outputPath.lastIndexOf('/'));
+                SharingService.openFolder(dirPath);
+              },
+            ),
+            _OptionTile(
               icon: Icons.delete_outline_rounded,
               label: ref.tr('recent_delete_record'),
               color: MeiColors.error,

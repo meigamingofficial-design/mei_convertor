@@ -48,30 +48,28 @@ class _ImageToolsScreenState extends ConsumerState<ImageToolsScreen>
   @override
   void initState() {
     super.initState();
-    final initialIndex = _tabIndexFor(widget.initialTabName);
+    final tabs = [
+      ImageToolsTab.convert,
+      ImageToolsTab.compress,
+      ImageToolsTab.resize,
+    ];
+    final providerTab = ref.read(imageToolsProvider).tab;
+    final initialIndex = widget.initialTabName != null
+        ? _tabIndexFor(widget.initialTabName)
+        : tabs.indexOf(providerTab);
     _tabController = TabController(
       length: 3,
       vsync: this,
-      initialIndex: initialIndex,
+      initialIndex: initialIndex >= 0 ? initialIndex : 0,
     );
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
-        final tabs = [
-          ImageToolsTab.convert,
-          ImageToolsTab.compress,
-          ImageToolsTab.resize,
-        ];
         ref.read(imageToolsProvider.notifier).setTab(tabs[_tabController.index]);
       }
     });
 
     if (widget.initialTabName != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final tabs = [
-          ImageToolsTab.convert,
-          ImageToolsTab.compress,
-          ImageToolsTab.resize,
-        ];
         ref.read(imageToolsProvider.notifier).setTab(tabs[initialIndex]);
       });
     }
@@ -86,6 +84,12 @@ class _ImageToolsScreenState extends ConsumerState<ImageToolsScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(imageToolsProvider);
+    final notifier = ref.read(imageToolsProvider.notifier);
+    final hasFile = switch (state.tab) {
+      ImageToolsTab.convert => state.convertState.selectedPaths.isNotEmpty || state.convertState.outputPath != null,
+      ImageToolsTab.compress => state.compressState.selectedPaths.isNotEmpty || state.compressState.outputPath != null,
+      ImageToolsTab.resize => state.resizeState.selectedPaths.isNotEmpty || state.resizeState.outputPath != null,
+    };
 
     return Scaffold(
       backgroundColor: MeiColors.offWhite,
@@ -95,6 +99,14 @@ class _ImageToolsScreenState extends ConsumerState<ImageToolsScreen>
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          if (hasFile)
+            TextButton(
+              onPressed: notifier.reset,
+              style: TextButton.styleFrom(foregroundColor: MeiColors.error),
+              child: Text(ref.tr('doc_label_clear')),
+            ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: MeiColors.imageBlueDeep,
@@ -138,6 +150,9 @@ class _ConvertTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(imageToolsProvider.notifier);
+    final sub = state.convertState;
+    final hasFile = sub.selectedPaths.isNotEmpty;
+    final isBusy = sub.status == ImageToolsStatus.converting;
 
     return SingleChildScrollView(
       padding: MeiSpacing.pageInsets,
@@ -148,7 +163,7 @@ class _ConvertTab extends ConsumerWidget {
         children: [
           const Gap(MeiSpacing.lg),
 
-          if (!state.hasFile)
+          if (!hasFile)
             MeiEmptyState(
               icon: Icons.add_photo_alternate_rounded,
               title: ref.tr('image_empty_convert'),
@@ -161,73 +176,75 @@ class _ConvertTab extends ConsumerWidget {
           else ...[
             // File picker showing details
             _FilePicker(
-              hasFile: state.hasFile,
-              label: ref.tr('image_selected_count').replaceAll('{count}', '${state.selectedPaths.length}'),
+              hasFile: hasFile,
+              label: ref.tr('image_selected_count').replaceAll('{count}', '${sub.selectedPaths.length}'),
               sublabel: 'JPG, PNG, WEBP, BMP supported',
               onTap: notifier.pickFiles,
               onRemove: notifier.reset,
-              fileSize: _formatTotalSize(state.selectedPaths),
+              fileSize: _formatTotalSize(sub.selectedPaths),
             ),
             const Gap(MeiSpacing.xxl),
 
             // File chips
-            _FileChips(paths: state.selectedPaths),
+            _FileChips(paths: sub.selectedPaths),
             const Gap(MeiSpacing.xxl),
 
             // Format selector
-            Text(ref.tr('quick_label_convert_to'), style: MeiTextStyles.headlineSmall),
-            const Gap(MeiSpacing.md),
-            Wrap(
-              spacing: MeiSpacing.sm,
-              runSpacing: MeiSpacing.sm,
-              children: _formats.map((fmt) {
-                final isSelected = state.outputFormat == fmt;
-                return _FormatChip(
-                  label: fmt.toUpperCase(),
-                  isSelected: isSelected,
-                  onTap: () => notifier.setOutputFormat(fmt),
-                );
-              }).toList(),
-            ),
-            const Gap(MeiSpacing.xxl),
+            if (sub.status != ImageToolsStatus.done) ...[
+              Text(ref.tr('quick_label_convert_to'), style: MeiTextStyles.headlineSmall),
+              const Gap(MeiSpacing.md),
+              Wrap(
+                spacing: MeiSpacing.sm,
+                runSpacing: MeiSpacing.sm,
+                children: _formats.map((fmt) {
+                  final isSelected = sub.outputFormat == fmt;
+                  return _FormatChip(
+                    label: fmt.toUpperCase(),
+                    isSelected: isSelected,
+                    onTap: () => notifier.setOutputFormat(fmt),
+                  );
+                }).toList(),
+              ),
+              const Gap(MeiSpacing.xxl),
+            ],
 
             // Convert button
-            if (state.status != ImageToolsStatus.done)
+            if (sub.status != ImageToolsStatus.done)
               MeiButton(
-                label: state.isBusy
+                label: isBusy
                     ? ref.tr('quick_btn_converting')
-                    : ref.tr('quick_btn_convert').replaceAll('{format}', state.outputFormat.toUpperCase()),
+                    : ref.tr('quick_btn_convert').replaceAll('{format}', sub.outputFormat.toUpperCase()),
                 icon: Icons.transform_rounded,
-                onPressed: state.isBusy ? null : notifier.convert,
-                isLoading: state.isBusy,
+                onPressed: isBusy ? null : notifier.convert,
+                isLoading: isBusy,
                 width: double.infinity,
                 backgroundColor: MeiColors.imageBlueDeep,
               ),
           ],
 
           // Progress
-          if (state.isBusy) ...[
+          if (isBusy) ...[
             const Gap(MeiSpacing.lg),
             ClipRRect(
               borderRadius: MeiRadius.smAll,
               child: LinearProgressIndicator(
-                value: state.progress > 0 ? state.progress : null,
+                value: sub.progress > 0 ? sub.progress : null,
                 minHeight: 4,
               ),
             ),
           ],
 
           // Result
-          if (state.status == ImageToolsStatus.done && state.outputPath != null)
+          if (sub.status == ImageToolsStatus.done && sub.outputPath != null)
             _ResultCard(
-              outputPath: state.outputPath!,
-              originalPaths: state.selectedPaths,
+              outputPath: sub.outputPath!,
+              originalPaths: sub.selectedPaths,
               onReset: notifier.convertAnother,
             ),
 
           // Error
-          if (state.status == ImageToolsStatus.failed && state.failure != null)
-            _ErrorCard(message: state.failure!.message),
+          if (sub.status == ImageToolsStatus.failed && sub.failure != null)
+            _ErrorCard(message: sub.failure!.message),
 
           const Gap(MeiSpacing.massive),
         ],
@@ -245,7 +262,11 @@ class _CompressTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(imageToolsProvider.notifier);
-    final quality = state.quality;
+    final sub = state.compressState;
+    final hasFile = sub.selectedPaths.isNotEmpty;
+    final isBusy = sub.status == ImageToolsStatus.converting;
+    final primaryPath = sub.selectedPaths.isEmpty ? '' : sub.selectedPaths.first;
+    final quality = sub.quality;
 
     return SingleChildScrollView(
       padding: MeiSpacing.pageInsets,
@@ -256,7 +277,7 @@ class _CompressTab extends ConsumerWidget {
         children: [
           const Gap(MeiSpacing.lg),
 
-          if (!state.hasFile)
+          if (!hasFile)
             MeiEmptyState(
               icon: Icons.compress_rounded,
               title: ref.tr('image_empty_compress'),
@@ -268,14 +289,14 @@ class _CompressTab extends ConsumerWidget {
             )
           else ...[
             _FilePicker(
-              hasFile: state.hasFile,
-              label: state.primaryPath.split('/').last,
+              hasFile: hasFile,
+              label: primaryPath.split('/').last,
               sublabel: ref.tr('image_tab_compress'),
               onTap: notifier.pickFiles,
               onRemove: notifier.reset,
-              fileSize: _getFileSize(state.primaryPath),
-              dimensions: state.sourceWidth != null
-                  ? '${state.sourceWidth} × ${state.sourceHeight} px'
+              fileSize: _getFileSize(primaryPath),
+              dimensions: state.resizeState.sourceWidth != null
+                  ? '${state.resizeState.sourceWidth} × ${state.resizeState.sourceHeight} px'
                   : null,
             ),
             const Gap(MeiSpacing.xxl),
@@ -339,26 +360,26 @@ class _CompressTab extends ConsumerWidget {
             ),
             const Gap(MeiSpacing.xxl),
 
-            if (state.status != ImageToolsStatus.done)
+            if (sub.status != ImageToolsStatus.done)
               MeiButton(
-                label: state.isBusy ? ref.tr('pdf_btn_compressing') : ref.tr('image_btn_compress'),
+                label: isBusy ? ref.tr('pdf_btn_compressing') : ref.tr('image_btn_compress'),
                 icon: Icons.compress_rounded,
-                onPressed: state.isBusy ? null : notifier.compress,
-                isLoading: state.isBusy,
+                onPressed: isBusy ? null : notifier.compress,
+                isLoading: isBusy,
                 width: double.infinity,
                 backgroundColor: MeiColors.imageBlueDeep,
               ),
           ],
 
-          if (state.status == ImageToolsStatus.done && state.outputPath != null)
+          if (sub.status == ImageToolsStatus.done && sub.outputPath != null)
             _ResultCard(
-              outputPath: state.outputPath!,
-              originalPaths: state.selectedPaths,
+              outputPath: sub.outputPath!,
+              originalPaths: sub.selectedPaths,
               onReset: notifier.convertAnother,
             ),
 
-          if (state.status == ImageToolsStatus.failed && state.failure != null)
-            _ErrorCard(message: state.failure!.message),
+          if (sub.status == ImageToolsStatus.failed && sub.failure != null)
+            _ErrorCard(message: sub.failure!.message),
 
           const Gap(MeiSpacing.massive),
         ],
@@ -383,14 +404,26 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
   bool _syncing = false;
 
   @override
+  void initState() {
+    super.initState();
+    final sub = ref.read(imageToolsProvider).resizeState;
+    if (sub.targetWidth != null) {
+      _widthCtrl.text = '${sub.targetWidth}';
+    }
+    if (sub.targetHeight != null) {
+      _heightCtrl.text = '${sub.targetHeight}';
+    }
+  }
+
+  @override
   void didUpdateWidget(_ResizeTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final s = widget.state;
-    if (s.targetWidth != null && !_syncing) {
-      _widthCtrl.text = '${s.targetWidth}';
+    final sub = widget.state.resizeState;
+    if (sub.targetWidth != null && !_syncing) {
+      _widthCtrl.text = '${sub.targetWidth}';
     }
-    if (s.targetHeight != null && !_syncing) {
-      _heightCtrl.text = '${s.targetHeight}';
+    if (sub.targetHeight != null && !_syncing) {
+      _heightCtrl.text = '${sub.targetHeight}';
     }
   }
 
@@ -404,7 +437,11 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
   @override
   Widget build(BuildContext context) {
     final state = widget.state;
+    final sub = state.resizeState;
     final notifier = ref.read(imageToolsProvider.notifier);
+    final hasFile = sub.selectedPaths.isNotEmpty;
+    final isBusy = sub.status == ImageToolsStatus.converting;
+    final primaryPath = sub.selectedPaths.isEmpty ? '' : sub.selectedPaths.first;
 
     final wStr = _widthCtrl.text;
     final hStr = _heightCtrl.text;
@@ -415,17 +452,17 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
     String? heightError;
     String? sizeWarning;
 
-    if (state.hasFile) {
+    if (hasFile && sub.sourceWidth != null) {
       if (wStr.isEmpty || wVal == null || wVal < 1) {
         widthError = ref.tr('image_error_width_empty');
-      } else if (state.sourceWidth != null && wVal > state.sourceWidth!) {
-        widthError = ref.tr('image_error_width_max').replaceAll('{max}', '${state.sourceWidth}');
+      } else if (sub.sourceWidth != null && wVal > sub.sourceWidth!) {
+        widthError = ref.tr('image_error_width_max').replaceAll('{max}', '${sub.sourceWidth}');
       }
 
       if (hStr.isEmpty || hVal == null || hVal < 1) {
         heightError = ref.tr('image_error_height_empty');
-      } else if (state.sourceHeight != null && hVal > state.sourceHeight!) {
-        heightError = ref.tr('image_error_height_max').replaceAll('{max}', '${state.sourceHeight}');
+      } else if (sub.sourceHeight != null && hVal > sub.sourceHeight!) {
+        heightError = ref.tr('image_error_height_max').replaceAll('{max}', '${sub.sourceHeight}');
       }
 
       if (widthError == null && heightError == null) {
@@ -435,7 +472,7 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
       }
     }
 
-    final isValid = state.hasFile && widthError == null && heightError == null;
+    final isValid = hasFile && widthError == null && heightError == null && sub.sourceWidth != null;
 
     return SingleChildScrollView(
       padding: MeiSpacing.pageInsets,
@@ -446,7 +483,7 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
         children: [
           const Gap(MeiSpacing.lg),
 
-          if (!state.hasFile)
+          if (!hasFile)
             MeiEmptyState(
               icon: Icons.aspect_ratio_rounded,
               title: ref.tr('image_empty_resize'),
@@ -458,14 +495,14 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
             )
           else ...[
             _FilePicker(
-              hasFile: state.hasFile,
-              label: state.primaryPath.split('/').last,
+              hasFile: hasFile,
+              label: primaryPath.split('/').last,
               sublabel: ref.tr('image_tab_resize'),
               onTap: notifier.pickFiles,
               onRemove: notifier.reset,
-              fileSize: _getFileSize(state.primaryPath),
-              dimensions: state.sourceWidth != null
-                  ? '${state.sourceWidth} × ${state.sourceHeight} px'
+              fileSize: _getFileSize(primaryPath),
+              dimensions: sub.sourceWidth != null
+                  ? '${sub.sourceWidth} × ${sub.sourceHeight} px'
                   : null,
             ),
             const Gap(MeiSpacing.xxl),
@@ -478,28 +515,29 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(ref.tr('image_label_dims'),
-                          style: MeiTextStyles.titleMedium),
-                      GestureDetector(
-                        onTap: notifier.toggleAspectLock,
-                        child: Row(
-                          children: [
-                            Text(
-                              state.lockAspectRatio ? '🔒' : '🔓',
-                              style: const TextStyle(fontSize: 14),
+                      Text(
+                        ref.tr('image_label_dims'),
+                        style: MeiTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            ref.tr('image_keep_ratio'),
+                            style: MeiTextStyles.labelSmall.copyWith(
+                              color: sub.lockAspectRatio
+                                  ? MeiColors.imageBlueDeep
+                                  : MeiColors.textSecondary,
+                              fontWeight: FontWeight.w600,
                             ),
-                            const Gap(4),
-                            Text(
-                              ref.tr('image_keep_ratio'),
-                              style: MeiTextStyles.labelSmall.copyWith(
-                                color: state.lockAspectRatio
-                                    ? MeiColors.imageBlueDeep
-                                    : MeiColors.textTertiary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const Gap(8),
+                          Switch.adaptive(
+                            value: sub.lockAspectRatio,
+                            onChanged: (_) => notifier.toggleAspectLock(),
+                            activeThumbColor: MeiColors.imageBlueDeep,
+                            activeTrackColor: MeiColors.imageBlueLight,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -517,24 +555,38 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
                             _syncing = true;
                             notifier.setTargetWidth(int.tryParse(v));
                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (state.lockAspectRatio && state.targetHeight != null) {
-                                _heightCtrl.text = '${state.targetHeight}';
+                              if (sub.lockAspectRatio && sub.targetHeight != null) {
+                                _heightCtrl.text = '${sub.targetHeight}';
                               }
                               _syncing = false;
                             });
                           },
                         ),
                       ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: MeiSpacing.md).copyWith(top: 36),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: MeiSpacing.xs).copyWith(top: 32),
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: sub.lockAspectRatio
+                              ? MeiColors.imageBlueLight
+                              : MeiColors.offWhite,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: sub.lockAspectRatio
+                                ? MeiColors.imageBlueDeep.withValues(alpha: 0.3)
+                                : MeiColors.border,
+                            width: 1,
+                          ),
+                        ),
                         child: Icon(
-                          state.lockAspectRatio
+                          sub.lockAspectRatio
                               ? Icons.link_rounded
                               : Icons.link_off_rounded,
-                          color: state.lockAspectRatio
+                          size: 18,
+                          color: sub.lockAspectRatio
                               ? MeiColors.imageBlueDeep
-                              : MeiColors.gray300,
+                              : MeiColors.textTertiary,
                         ),
                       ),
                       Expanded(
@@ -547,8 +599,8 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
                             _syncing = true;
                             notifier.setTargetHeight(int.tryParse(v));
                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (state.lockAspectRatio && state.targetWidth != null) {
-                                _widthCtrl.text = '${state.targetWidth}';
+                              if (sub.lockAspectRatio && sub.targetWidth != null) {
+                                _widthCtrl.text = '${sub.targetWidth}';
                               }
                               _syncing = false;
                             });
@@ -579,29 +631,29 @@ class _ResizeTabState extends ConsumerState<_ResizeTab> {
             ),
             const Gap(MeiSpacing.xxl),
 
-            if (state.status != ImageToolsStatus.done)
+            if (sub.status != ImageToolsStatus.done)
               MeiButton(
-                label: state.isBusy ? ref.tr('image_btn_resizing') : ref.tr('image_btn_resize'),
+                label: isBusy ? ref.tr('image_btn_resizing') : ref.tr('image_btn_resize'),
                 icon: Icons.aspect_ratio_rounded,
-                onPressed: (isValid && !state.isBusy) ? notifier.resize : null,
-                isLoading: state.isBusy,
+                onPressed: isValid ? notifier.resize : null,
+                isLoading: isBusy,
                 width: double.infinity,
                 backgroundColor: MeiColors.imageBlueDeep,
               ),
           ],
 
-          if (state.status == ImageToolsStatus.done && state.outputPath != null)
+          if (sub.status == ImageToolsStatus.done && sub.outputPath != null)
             _ResultCard(
-              outputPath: state.outputPath!,
-              originalPaths: state.selectedPaths,
+              outputPath: sub.outputPath!,
+              originalPaths: sub.selectedPaths,
               onReset: notifier.convertAnother,
               isResize: true,
-              targetWidth: state.targetWidth,
-              targetHeight: state.targetHeight,
+              targetWidth: sub.targetWidth,
+              targetHeight: sub.targetHeight,
             ),
 
-          if (state.status == ImageToolsStatus.failed && state.failure != null)
-            _ErrorCard(message: state.failure!.message),
+          if (sub.status == ImageToolsStatus.failed && sub.failure != null)
+            _ErrorCard(message: sub.failure!.message),
 
           const Gap(MeiSpacing.massive),
         ],
@@ -935,6 +987,10 @@ class _ResultCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fileName = outputPath.split('/').last;
+    final origFmt = originalPaths.isNotEmpty
+        ? originalPaths.first.split('.').last.toUpperCase()
+        : 'IMG';
+    final outFmt = outputPath.split('.').last.toUpperCase();
     
     int originalSize = 0;
     int convertedSize = 0;
@@ -994,8 +1050,14 @@ class _ResultCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _StatItem(label: ref.tr('original_size'), value: _formatSize(originalSize)),
-                _StatItem(label: ref.tr('new_size'), value: _formatSize(convertedSize)),
+                _StatItem(
+                  label: ref.tr('original_format').replaceAll('{format}', origFmt),
+                  value: _formatSize(originalSize),
+                ),
+                _StatItem(
+                  label: ref.tr('output_format').replaceAll('{format}', outFmt),
+                  value: _formatSize(convertedSize),
+                ),
                 if (spaceSaved > 0 && !isResize)
                   _StatItem(label: ref.tr('space_saved'), value: '$spaceSaved%'),
                 if (isResize && targetWidth != null && targetHeight != null)
@@ -1052,7 +1114,7 @@ class _ResultCard extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () async {
                   final dir = await FileUtils.outputDir();
-                  await SharingService.openFile(dir.path);
+                  await SharingService.openFolder(dir.path);
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: MeiColors.imageBlueDeep,
@@ -1065,10 +1127,13 @@ class _ResultCard extends ConsumerWidget {
             const Gap(MeiSpacing.sm),
             Align(
               alignment: Alignment.center,
-              child: TextButton(
+              child: OutlinedButton(
                 onPressed: onReset,
-                style: TextButton.styleFrom(
+                style: OutlinedButton.styleFrom(
                   foregroundColor: MeiColors.imageBlueDeep,
+                  side: const BorderSide(color: MeiColors.imageBlueDeep, width: 1.5),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: Text(ref.tr('convert_another')),
               ),
@@ -1144,49 +1209,57 @@ class _DimensionField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: MeiTextStyles.labelMedium),
-        const Gap(MeiSpacing.xs),
-        Container(
-          decoration: BoxDecoration(
-            color: MeiColors.white,
-            borderRadius: MeiRadius.mdAll,
-            border: Border.all(color: errorText != null ? MeiColors.error : MeiColors.border),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: onChanged,
-                  style: MeiTextStyles.bodyMedium,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                        horizontal: MeiSpacing.md, vertical: MeiSpacing.sm),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: MeiSpacing.sm),
-                child: Text(
-                  unit,
-                  style: MeiTextStyles.labelSmall.copyWith(
-                    color: errorText != null ? MeiColors.error : MeiColors.textTertiary,
-                  ),
-                ),
-              ),
-            ],
+        Text(
+          label,
+          style: MeiTextStyles.labelMedium.copyWith(
+            fontWeight: FontWeight.w600,
+            color: MeiColors.textSecondary,
           ),
         ),
-        if (errorText != null) ...[
-          const Gap(4),
-          Text(
-            errorText!,
-            style: MeiTextStyles.labelSmall.copyWith(color: MeiColors.error),
+        const Gap(MeiSpacing.xs),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          onChanged: onChanged,
+          style: MeiTextStyles.titleMedium.copyWith(
+            fontWeight: FontWeight.w600,
+            color: errorText != null ? MeiColors.error : MeiColors.textPrimary,
           ),
-        ],
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: MeiColors.white,
+            suffixText: unit,
+            suffixStyle: MeiTextStyles.labelMedium.copyWith(
+              color: errorText != null ? MeiColors.error : MeiColors.textTertiary,
+              fontWeight: FontWeight.w600,
+            ),
+            errorText: errorText,
+            errorStyle: MeiTextStyles.labelSmall.copyWith(color: MeiColors.error),
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: MeiSpacing.md, vertical: MeiSpacing.md),
+            border: const OutlineInputBorder(
+              borderRadius: MeiRadius.mdAll,
+              borderSide: BorderSide(color: MeiColors.border, width: 1.5),
+            ),
+            enabledBorder: const OutlineInputBorder(
+              borderRadius: MeiRadius.mdAll,
+              borderSide: BorderSide(color: MeiColors.border, width: 1.5),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: MeiRadius.mdAll,
+              borderSide: BorderSide(color: MeiColors.imageBlueDeep, width: 2.0),
+            ),
+            errorBorder: const OutlineInputBorder(
+              borderRadius: MeiRadius.mdAll,
+              borderSide: BorderSide(color: MeiColors.error, width: 1.5),
+            ),
+            focusedErrorBorder: const OutlineInputBorder(
+              borderRadius: MeiRadius.mdAll,
+              borderSide: BorderSide(color: MeiColors.error, width: 2.0),
+            ),
+          ),
+        ),
       ],
     );
   }

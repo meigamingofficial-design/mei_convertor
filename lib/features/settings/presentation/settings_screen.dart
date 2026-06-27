@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/localization/locale_provider.dart';
+import '../../../core/providers/package_info_provider.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/mei_card.dart';
 
@@ -14,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLang = ref.watch(localeProvider);
+    final packageInfo = ref.watch(packageInfoProvider);
 
     return Scaffold(
       backgroundColor: MeiColors.offWhite,
@@ -178,6 +180,18 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  const Divider(indent: 56),
+                  ListTile(
+                    leading: const Icon(Icons.description_outlined, color: MeiColors.sakuraDeep),
+                    title: Text(ref.tr('settings_licenses')),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                    onTap: () => showLicensePage(
+                      context: context,
+                      applicationName: ref.tr('app_name'),
+                      applicationVersion: '${packageInfo.version} (${packageInfo.buildNumber})',
+                      applicationLegalese: '© 2026 ${ref.tr('settings_dev_value')}',
+                    ),
+                  ),
                 ],
               ),
             ).animate().fadeIn(duration: 300.ms, delay: 100.ms),
@@ -206,7 +220,10 @@ class SettingsScreen extends ConsumerWidget {
                   const Gap(MeiSpacing.md),
                   _InfoRow(label: ref.tr('settings_contact'), value: ref.tr('settings_contact_value')),
                   const Gap(MeiSpacing.md),
-                  _InfoRow(label: ref.tr('settings_version'), value: ref.tr('settings_version_value')),
+                  _InfoRow(
+                    label: ref.tr('settings_version'),
+                    value: '${packageInfo.version} (${packageInfo.buildNumber})',
+                  ),
                 ],
               ),
             ).animate().fadeIn(duration: 300.ms, delay: 150.ms),

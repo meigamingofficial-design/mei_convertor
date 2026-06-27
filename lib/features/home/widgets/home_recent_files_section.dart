@@ -14,6 +14,72 @@ import '../../recent_files/providers/history_provider.dart';
 class HomeRecentFilesSection extends ConsumerWidget {
   const HomeRecentFilesSection({super.key});
 
+  void _showOptions(BuildContext context, WidgetRef ref, ConversionRecord record) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  MeiSpacing.lg, MeiSpacing.md, MeiSpacing.lg, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      record.outputFileName,
+                      style: MeiTextStyles.titleMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            _OptionTile(
+              icon: Icons.open_in_new_rounded,
+              label: ref.tr('recent_open_file'),
+              onTap: () {
+                Navigator.pop(ctx);
+                SharingService.openFile(record.outputPath);
+              },
+            ),
+            _OptionTile(
+              icon: Icons.share_rounded,
+              label: ref.tr('recent_share_file'),
+              onTap: () {
+                Navigator.pop(ctx);
+                SharingService.shareFile(record.outputPath,
+                    subject: record.outputFileName);
+              },
+            ),
+            _OptionTile(
+              icon: Icons.folder_open_rounded,
+              label: ref.tr('open_folder'),
+              onTap: () {
+                Navigator.pop(ctx);
+                final dirPath = record.outputPath.substring(0, record.outputPath.lastIndexOf('/'));
+                SharingService.openFolder(dirPath);
+              },
+            ),
+            _OptionTile(
+              icon: Icons.delete_outline_rounded,
+              label: ref.tr('recent_delete_record'),
+              color: MeiColors.error,
+              onTap: () {
+                Navigator.pop(ctx);
+                ref.read(historyProvider.notifier).remove(record.id);
+              },
+            ),
+            const Gap(MeiSpacing.md),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(historyProvider);
@@ -40,7 +106,7 @@ class HomeRecentFilesSection extends ConsumerWidget {
                 children: [
                   RecentFileTile(
                     record: record,
-                    onTap: () => SharingService.openFile(record.outputPath),
+                    onTap: () => _showOptions(context, ref, record),
                   ).animate().fadeIn(
                         duration: 350.ms,
                         delay: (index * 80 + 200).ms,
@@ -198,6 +264,34 @@ class RecentFileTile extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _OptionTile extends StatelessWidget {
+  const _OptionTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+  });
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: color ?? MeiColors.textPrimary, size: 22),
+      title: Text(
+        label,
+        style: MeiTextStyles.bodyMedium.copyWith(
+          color: color ?? MeiColors.textPrimary,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }

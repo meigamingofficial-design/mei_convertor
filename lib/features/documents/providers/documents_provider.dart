@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/errors/failures.dart';
 import '../../../core/models/conversion_record.dart';
 import '../../../core/services/mei_logger.dart';
+import '../../../core/utils/file_utils.dart';
 import '../../pdf_tools/services/pdf_converter_service.dart';
 import '../../recent_files/providers/history_provider.dart';
 import '../services/document_converter_service.dart';
@@ -19,9 +20,8 @@ enum DocumentsStatus { idle, converting, done, failed }
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
-class DocumentsState {
-  const DocumentsState({
-    this.tab = DocumentsTab.toPdf,
+class DocumentsTabState {
+  const DocumentsTabState({
     this.status = DocumentsStatus.idle,
     this.selectedPath,
     this.previewLines = const [],
@@ -29,14 +29,69 @@ class DocumentsState {
     this.failure,
   });
 
-  final DocumentsTab tab;
   final DocumentsStatus status;
   final String? selectedPath;
   final List<String> previewLines;
   final String? outputPath;
   final MeiFailure? failure;
 
-  // ── Computed ──────────────────────────────────────────────────────────────
+  DocumentsTabState copyWith({
+    DocumentsStatus? status,
+    String? selectedPath,
+    List<String>? previewLines,
+    String? outputPath,
+    MeiFailure? failure,
+  }) =>
+      DocumentsTabState(
+        status: status ?? this.status,
+        selectedPath: selectedPath ?? this.selectedPath,
+        previewLines: previewLines ?? this.previewLines,
+        outputPath: outputPath ?? this.outputPath,
+        failure: failure ?? this.failure,
+      );
+}
+
+class DocumentsState {
+  DocumentsState({
+    this.tab = DocumentsTab.toPdf,
+    DocumentsTabState? pdfState,
+    DocumentsTabState? docxState,
+    // Backward compatibility:
+    DocumentsStatus? status,
+    String? selectedPath,
+    List<String>? previewLines,
+    String? outputPath,
+    MeiFailure? failure,
+  })  : pdfState = pdfState ??
+            DocumentsTabState(
+              status: (tab == DocumentsTab.toPdf) ? (status ?? DocumentsStatus.idle) : DocumentsStatus.idle,
+              selectedPath: (tab == DocumentsTab.toPdf) ? selectedPath : null,
+              previewLines: (tab == DocumentsTab.toPdf) ? (previewLines ?? const []) : const [],
+              outputPath: (tab == DocumentsTab.toPdf) ? outputPath : null,
+              failure: (tab == DocumentsTab.toPdf) ? failure : null,
+            ),
+        docxState = docxState ??
+            DocumentsTabState(
+              status: (tab == DocumentsTab.toDocx) ? (status ?? DocumentsStatus.idle) : DocumentsStatus.idle,
+              selectedPath: (tab == DocumentsTab.toDocx) ? selectedPath : null,
+              previewLines: (tab == DocumentsTab.toDocx) ? (previewLines ?? const []) : const [],
+              outputPath: (tab == DocumentsTab.toDocx) ? outputPath : null,
+              failure: (tab == DocumentsTab.toDocx) ? failure : null,
+            );
+
+  final DocumentsTab tab;
+  final DocumentsTabState pdfState;
+  final DocumentsTabState docxState;
+
+  DocumentsTabState get currentTabState => tab == DocumentsTab.toPdf ? pdfState : docxState;
+
+  // Computed properties pointing to the active tab's sub-state
+  DocumentsStatus get status => currentTabState.status;
+  String? get selectedPath => currentTabState.selectedPath;
+  List<String> get previewLines => currentTabState.previewLines;
+  String? get outputPath => currentTabState.outputPath;
+  MeiFailure? get failure => currentTabState.failure;
+
   bool get hasFile => selectedPath != null;
   bool get isBusy  => status == DocumentsStatus.converting;
   String get fileName =>
@@ -44,20 +99,36 @@ class DocumentsState {
 
   DocumentsState copyWith({
     DocumentsTab? tab,
+    DocumentsTabState? pdfState,
+    DocumentsTabState? docxState,
+    // Backward compatibility:
     DocumentsStatus? status,
     String? selectedPath,
     List<String>? previewLines,
     String? outputPath,
     MeiFailure? failure,
-  }) =>
-      DocumentsState(
-        tab: tab ?? this.tab,
-        status: status ?? this.status,
-        selectedPath: selectedPath ?? this.selectedPath,
-        previewLines: previewLines ?? this.previewLines,
-        outputPath: outputPath ?? this.outputPath,
-        failure: failure ?? this.failure,
-      );
+  }) {
+    final nextTab = tab ?? this.tab;
+    return DocumentsState(
+      tab: nextTab,
+      pdfState: pdfState ??
+          this.pdfState.copyWith(
+            status: (nextTab == DocumentsTab.toPdf) ? (status ?? this.pdfState.status) : this.pdfState.status,
+            selectedPath: (nextTab == DocumentsTab.toPdf) ? (selectedPath ?? this.pdfState.selectedPath) : this.pdfState.selectedPath,
+            previewLines: (nextTab == DocumentsTab.toPdf) ? (previewLines ?? this.pdfState.previewLines) : this.pdfState.previewLines,
+            outputPath: (nextTab == DocumentsTab.toPdf) ? (outputPath ?? this.pdfState.outputPath) : this.pdfState.outputPath,
+            failure: (nextTab == DocumentsTab.toPdf) ? (failure ?? this.pdfState.failure) : this.pdfState.failure,
+          ),
+      docxState: docxState ??
+          this.docxState.copyWith(
+            status: (nextTab == DocumentsTab.toDocx) ? (status ?? this.docxState.status) : this.docxState.status,
+            selectedPath: (nextTab == DocumentsTab.toDocx) ? (selectedPath ?? this.docxState.selectedPath) : this.docxState.selectedPath,
+            previewLines: (nextTab == DocumentsTab.toDocx) ? (previewLines ?? this.docxState.previewLines) : this.docxState.previewLines,
+            outputPath: (nextTab == DocumentsTab.toDocx) ? (outputPath ?? this.docxState.outputPath) : this.docxState.outputPath,
+            failure: (nextTab == DocumentsTab.toDocx) ? (failure ?? this.docxState.failure) : this.docxState.failure,
+          ),
+    );
+  }
 }
 
 // ── Notifier ──────────────────────────────────────────────────────────────────
@@ -67,14 +138,21 @@ class DocumentsNotifier extends Notifier<DocumentsState> {
   static const _uuid = Uuid();
 
   @override
-  DocumentsState build() => const DocumentsState();
+  DocumentsState build() => DocumentsState();
+
+  // Helper to update active tab's sub-state
+  void _updateCurrentTab(DocumentsTabState Function(DocumentsTabState) update) {
+    if (state.tab == DocumentsTab.toPdf) {
+      state = state.copyWith(pdfState: update(state.pdfState));
+    } else {
+      state = state.copyWith(docxState: update(state.docxState));
+    }
+  }
 
   // ── Tab ───────────────────────────────────────────────────────────────────
 
   void setTab(DocumentsTab tab) {
-    // Switching tabs resets the whole state so output/errors from the
-    // previous tab don't bleed through.
-    state = DocumentsState(tab: tab);
+    state = state.copyWith(tab: tab);
   }
 
   // ── File picking ──────────────────────────────────────────────────────────
@@ -93,11 +171,13 @@ class DocumentsNotifier extends Notifier<DocumentsState> {
       final content = await File(path).readAsString();
       final lines   = content.split('\n').take(20).toList();
 
-      state = DocumentsState(
-        tab: state.tab,
+      _updateCurrentTab((s) => s.copyWith(
         selectedPath: path,
         previewLines: lines,
-      );
+        status: DocumentsStatus.idle,
+        outputPath: null,
+        failure: null,
+      ));
     } catch (e, st) {
       _log.e('pickFile failed', e, st);
     }
@@ -108,59 +188,63 @@ class DocumentsNotifier extends Notifier<DocumentsState> {
   /// TXT → PDF using the pw (pdf) package.
   Future<void> convertToPdf() async {
     if (!state.hasFile) return;
-    state = state.copyWith(status: DocumentsStatus.converting, failure: null);
+    _updateCurrentTab((s) => s.copyWith(status: DocumentsStatus.converting, failure: null));
     try {
-      final out = await PdfConverterService.textToPdf(state.selectedPath!);
+      var out = await PdfConverterService.textToPdf(state.selectedPath!);
+      out = await FileUtils.moveToPublic(out);
       await _saveHistory(
         inputPath: state.selectedPath!,
         outputPath: out,
         inputFormat: _ext(state.selectedPath!),
         outputFormat: 'pdf',
       );
-      state = state.copyWith(status: DocumentsStatus.done, outputPath: out);
+      _updateCurrentTab((s) => s.copyWith(status: DocumentsStatus.done, outputPath: out));
     } catch (e, st) {
       _log.e('convertToPdf failed', e, st);
-      state = state.copyWith(
+      _updateCurrentTab((s) => s.copyWith(
         status: DocumentsStatus.failed,
         failure: ConversionFailure(message: e.toString(), cause: e),
-      );
+      ));
     }
   }
 
   /// TXT → DOCX using the pure-Dart OpenXML builder.
   Future<void> convertToDocx() async {
     if (!state.hasFile) return;
-    state = state.copyWith(status: DocumentsStatus.converting, failure: null);
+    _updateCurrentTab((s) => s.copyWith(status: DocumentsStatus.converting, failure: null));
     try {
-      final out =
+      var out =
           await DocumentConverterService.convertToDocx(state.selectedPath!);
+      out = await FileUtils.moveToPublic(out);
       await _saveHistory(
         inputPath: state.selectedPath!,
         outputPath: out,
         inputFormat: _ext(state.selectedPath!),
         outputFormat: 'docx',
       );
-      state = state.copyWith(status: DocumentsStatus.done, outputPath: out);
+      _updateCurrentTab((s) => s.copyWith(status: DocumentsStatus.done, outputPath: out));
     } catch (e, st) {
       _log.e('convertToDocx failed', e, st);
-      state = state.copyWith(
+      _updateCurrentTab((s) => s.copyWith(
         status: DocumentsStatus.failed,
         failure: ConversionFailure(message: e.toString(), cause: e),
-      );
+      ));
     }
   }
 
   // ── Reset ─────────────────────────────────────────────────────────────────
 
   void convertAnother() {
-    state = state.copyWith(
+    _updateCurrentTab((s) => s.copyWith(
       status: DocumentsStatus.idle,
       outputPath: null,
       failure: null,
-    );
+    ));
   }
 
-  void reset() => state = DocumentsState(tab: state.tab);
+  void reset() {
+    _updateCurrentTab((s) => const DocumentsTabState());
+  }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -190,6 +274,10 @@ class DocumentsNotifier extends Notifier<DocumentsState> {
   }
 
   String _ext(String path) => path.split('.').last.toLowerCase();
+
+  void debugUpdateState(DocumentsState Function(DocumentsState) update) {
+    state = update(state);
+  }
 }
 
 // ── Provider ──────────────────────────────────────────────────────────────────

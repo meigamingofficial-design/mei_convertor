@@ -36,7 +36,6 @@ class _PdfToolsScreenState extends ConsumerState<PdfToolsScreen>
 
   static const _tabs = [
     PdfToolsTab.imagesToPdf,
-    PdfToolsTab.compress,
     PdfToolsTab.mergePdfs,
     PdfToolsTab.splitPdf,
   ];
@@ -47,14 +46,12 @@ class _PdfToolsScreenState extends ConsumerState<PdfToolsScreen>
       case 'imagesToPdf':
       case 'images_to_pdf':
         return 0;
-      case 'compress':
-        return 1;
       case 'mergePdfs':
       case 'merge':
-        return 2;
+        return 1;
       case 'splitPdf':
       case 'split':
-        return 3;
+        return 2;
       default:
         return 0;
     }
@@ -63,11 +60,14 @@ class _PdfToolsScreenState extends ConsumerState<PdfToolsScreen>
   @override
   void initState() {
     super.initState();
-    final initialIndex = _tabIndexFor(widget.initialTabName);
+    final providerTab = ref.read(pdfToolsProvider).tab;
+    final initialIndex = widget.initialTabName != null
+        ? _tabIndexFor(widget.initialTabName)
+        : _tabs.indexOf(providerTab);
     _tabController = TabController(
       length: _tabs.length,
       vsync: this,
-      initialIndex: initialIndex,
+      initialIndex: initialIndex >= 0 ? initialIndex : 0,
     );
     _tabController.addListener(_onTabChanged);
 
@@ -95,6 +95,14 @@ class _PdfToolsScreenState extends ConsumerState<PdfToolsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(pdfToolsProvider);
+    final notifier = ref.read(pdfToolsProvider.notifier);
+    final hasFile = switch (state.tab) {
+      PdfToolsTab.imagesToPdf => state.imagesToPdfState.sourcePaths.isNotEmpty || state.imagesToPdfState.outputPath != null,
+      PdfToolsTab.mergePdfs => state.mergeState.mergePdfPaths.isNotEmpty || state.mergeState.outputPath != null,
+      PdfToolsTab.splitPdf => state.splitState.splitSourcePath != null || state.splitState.splitOutputPaths.isNotEmpty || state.splitState.outputPath != null,
+    };
+
     return Scaffold(
       backgroundColor: MeiColors.offWhite,
       appBar: AppBar(
@@ -103,6 +111,14 @@ class _PdfToolsScreenState extends ConsumerState<PdfToolsScreen>
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          if (hasFile)
+            TextButton(
+              onPressed: notifier.reset,
+              style: TextButton.styleFrom(foregroundColor: MeiColors.error),
+              child: Text(ref.tr('doc_label_clear')),
+            ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: MeiColors.pdfRedDeep,
@@ -116,7 +132,6 @@ class _PdfToolsScreenState extends ConsumerState<PdfToolsScreen>
           unselectedLabelStyle: MeiTextStyles.labelLarge,
           tabs: [
             Tab(text: ref.tr('pdf_tab_images_to_pdf')),
-            Tab(text: ref.tr('pdf_tab_compress')),
             Tab(text: ref.tr('pdf_tab_merge')),
             Tab(text: ref.tr('pdf_tab_split')),
           ],
@@ -129,7 +144,6 @@ class _PdfToolsScreenState extends ConsumerState<PdfToolsScreen>
           controller: _tabController,
           children: const [
             _ImagesToPdfTab(),
-            _CompressTab(),
             _MergePdfsTab(),
             _SplitPdfTab(),
           ],
@@ -160,6 +174,10 @@ class _PdfSuccessCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fileName = outputPath.split('/').last;
+    final origFmt = originalPaths.isNotEmpty
+        ? originalPaths.first.split('.').last.toUpperCase()
+        : 'PDF';
+    const outFmt = 'PDF';
 
     int originalSize = 0;
     int convertedSize = 0;
@@ -216,8 +234,14 @@ class _PdfSuccessCard extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _StatItem(label: ref.tr('original_size'), value: _formatSize(originalSize)),
-              _StatItem(label: ref.tr('new_size'), value: _formatSize(convertedSize)),
+              _StatItem(
+                label: ref.tr('original_format').replaceAll('{format}', origFmt),
+                value: _formatSize(originalSize),
+              ),
+              _StatItem(
+                label: ref.tr('output_format').replaceAll('{format}', outFmt),
+                value: _formatSize(convertedSize),
+              ),
               if (spaceSaved > 0)
                 _StatItem(label: ref.tr('space_saved'), value: '$spaceSaved%'),
             ],
@@ -272,7 +296,7 @@ class _PdfSuccessCard extends ConsumerWidget {
             child: OutlinedButton.icon(
               onPressed: () async {
                 final dir = await FileUtils.outputDir();
-                await SharingService.openFile(dir.path);
+                await SharingService.openFolder(dir.path);
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: MeiColors.pdfRedDeep,
@@ -285,10 +309,13 @@ class _PdfSuccessCard extends ConsumerWidget {
           const Gap(MeiSpacing.sm),
           Align(
             alignment: Alignment.center,
-            child: TextButton(
+            child: OutlinedButton(
               onPressed: onReset,
-              style: TextButton.styleFrom(
+              style: OutlinedButton.styleFrom(
                 foregroundColor: MeiColors.pdfRedDeep,
+                side: const BorderSide(color: MeiColors.pdfRedDeep, width: 1.5),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: Text(ref.tr('convert_another')),
             ),
@@ -352,8 +379,10 @@ class _ImagesToPdfTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state    = ref.watch(pdfToolsProvider);
     final notifier = ref.read(pdfToolsProvider.notifier);
-    final done     = state.status == PdfToolsStatus.done && state.tab == PdfToolsTab.imagesToPdf;
-    final failed   = state.status == PdfToolsStatus.failed && state.tab == PdfToolsTab.imagesToPdf;
+    final sub      = state.imagesToPdfState;
+    final done     = sub.status == PdfToolsStatus.done;
+    final failed   = sub.status == PdfToolsStatus.failed;
+    final isBusy   = sub.status == PdfToolsStatus.converting;
 
     return SingleChildScrollView(
       padding: MeiSpacing.pageInsets,
@@ -364,7 +393,7 @@ class _ImagesToPdfTab extends ConsumerWidget {
         children: [
           const Gap(MeiSpacing.lg),
 
-          if (state.sourcePaths.isEmpty)
+          if (sub.sourcePaths.isEmpty)
             MeiEmptyState(
               icon: Icons.picture_as_pdf_rounded,
               title: ref.tr('pdf_empty_images_to_pdf'),
@@ -410,7 +439,7 @@ class _ImagesToPdfTab extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  ref.tr('pdf_selected_count').replaceAll('{count}', '${state.sourcePaths.length}'),
+                  ref.tr('pdf_selected_count').replaceAll('{count}', '${sub.sourcePaths.length}'),
                   style: MeiTextStyles.headlineSmall,
                 ),
                 TextButton.icon(
@@ -429,13 +458,13 @@ class _ImagesToPdfTab extends ConsumerWidget {
             ReorderableListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: state.sourcePaths.length,
+              itemCount: sub.sourcePaths.length,
               onReorderItem: notifier.reorderFilesItem,
               itemBuilder: (context, index) {
-                final name = state.sourcePaths[index].split('/').last;
-                final sizeStr = _getFileSize(state.sourcePaths[index]);
+                final name = sub.sourcePaths[index].split('/').last;
+                final sizeStr = _getFileSize(sub.sourcePaths[index]);
                 return _FileListTile(
-                  key: ValueKey(state.sourcePaths[index]),
+                  key: ValueKey(sub.sourcePaths[index]),
                   name: name,
                   index: index,
                   icon: Icons.image_rounded,
@@ -448,41 +477,41 @@ class _ImagesToPdfTab extends ConsumerWidget {
             ),
 
             const Gap(MeiSpacing.xxl),
-            if (state.status != PdfToolsStatus.done)
+            if (sub.status != PdfToolsStatus.done)
               MeiButton(
-                label: state.isBusy
-                    ? ref.tr('pdf_label_combining').replaceAll('{count}', '${state.sourcePaths.length}')
+                label: isBusy
+                    ? ref.tr('pdf_label_combining').replaceAll('{count}', '${sub.sourcePaths.length}')
                     : ref.tr('pdf_btn_convert'),
                 icon: Icons.picture_as_pdf_rounded,
-                onPressed: state.isBusy ? null : notifier.convertToPdf,
-                isLoading: state.isBusy,
+                onPressed: isBusy ? null : notifier.convertToPdf,
+                isLoading: isBusy,
                 backgroundColor: MeiColors.pdfRedDeep,
                 width: double.infinity,
               ),
           ],
 
-          if (state.isBusy)
+          if (isBusy)
             const Padding(
               padding: EdgeInsets.only(top: MeiSpacing.lg),
               child: LinearProgressIndicator(),
             ),
 
-          if (done && state.outputPath != null)
+          if (done && sub.outputPath != null)
             Padding(
               padding: const EdgeInsets.only(top: MeiSpacing.xxl),
               child: _PdfSuccessCard(
-                outputPath: state.outputPath!,
+                outputPath: sub.outputPath!,
                 title: ref.tr('pdf_success_created'),
                 onReset: notifier.convertAnother,
-                originalPaths: state.sourcePaths,
+                originalPaths: sub.sourcePaths,
               ),
             ),
 
-          if (failed && state.failure != null)
+          if (failed && sub.failure != null)
             Padding(
               padding: const EdgeInsets.only(top: MeiSpacing.xxl),
               child: _PdfErrorCard(
-                message: state.failure!.message,
+                message: sub.failure!.message,
                 onRetry: notifier.convertToPdf,
               ),
             ),
@@ -494,180 +523,6 @@ class _ImagesToPdfTab extends ConsumerWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Tab 2 — Compress
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _CompressTab extends ConsumerWidget {
-  const _CompressTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state    = ref.watch(pdfToolsProvider);
-    final notifier = ref.read(pdfToolsProvider.notifier);
-    final done     = state.status == PdfToolsStatus.done && state.tab == PdfToolsTab.compress;
-    final failed   = state.status == PdfToolsStatus.failed && state.tab == PdfToolsTab.compress;
-
-    return SingleChildScrollView(
-      padding: MeiSpacing.pageInsets,
-      physics: const BouncingScrollPhysics(),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Gap(MeiSpacing.lg),
-
-          if (!state.hasPdf)
-            MeiEmptyState(
-              icon: Icons.compress_rounded,
-              title: ref.tr('pdf_empty_compress'),
-              subtitle: ref.tr('pdf_empty_compress_sub'),
-              action: () async {
-                final result = await FilePicker.pickFiles(
-                  type: FileType.custom,
-                  allowedExtensions: ['pdf'],
-                );
-                if (result?.paths.isNotEmpty == true) {
-                  final path = result!.paths.first;
-                  if (path != null) notifier.setPdfSource(path);
-                }
-              },
-              actionLabel: ref.tr('pdf_btn_select_pdf'),
-              accentColor: MeiColors.pdfRedDeep,
-              accentBackground: MeiColors.pdfRedLight,
-            )
-          else ...[
-            // Polished Selected File Card (reusing visual system from image tools)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(MeiSpacing.lg),
-              decoration: BoxDecoration(
-                color: MeiColors.pdfRedLight,
-                borderRadius: MeiRadius.xlAll,
-                border: Border.all(
-                  color: MeiColors.pdfRedDeep,
-                  width: 1.5,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: MeiColors.pdfRedDeep.withValues(alpha: 0.15),
-                          borderRadius: MeiRadius.mdAll,
-                        ),
-                        child: const Icon(
-                          Icons.picture_as_pdf_rounded,
-                          size: 22,
-                          color: MeiColors.pdfRedDeep,
-                        ),
-                      ),
-                      const Gap(MeiSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              state.pdfSourcePath!.split('/').last,
-                              style: MeiTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w600),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const Gap(2),
-                            Text(
-                              _getFileSize(state.pdfSourcePath!),
-                              style: MeiTextStyles.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Gap(MeiSpacing.md),
-                  const Divider(color: MeiColors.pdfRed),
-                  const Gap(MeiSpacing.xs),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton.icon(
-                        onPressed: () async {
-                          final result = await FilePicker.pickFiles(
-                            type: FileType.custom,
-                            allowedExtensions: ['pdf'],
-                          );
-                          if (result?.paths.isNotEmpty == true) {
-                            final path = result!.paths.first;
-                            if (path != null) notifier.setPdfSource(path);
-                          }
-                        },
-                        icon: const Icon(Icons.refresh_rounded, size: 16, color: MeiColors.pdfRedDeep),
-                        label: Text(
-                          ref.tr('change_file'),
-                          style: MeiTextStyles.labelMedium.copyWith(color: MeiColors.pdfRedDeep),
-                        ),
-                      ),
-                      TextButton.icon(
-                        onPressed: notifier.reset,
-                        icon: const Icon(Icons.delete_outline_rounded, size: 16, color: MeiColors.error),
-                        label: Text(
-                          ref.tr('remove_file'),
-                          style: MeiTextStyles.labelMedium.copyWith(color: MeiColors.error),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const Gap(MeiSpacing.xxl),
-
-            if (state.status != PdfToolsStatus.done)
-              MeiButton(
-                label: state.isBusy ? ref.tr('pdf_btn_compressing') : ref.tr('pdf_btn_compress'),
-                icon: Icons.compress_rounded,
-                onPressed: state.isBusy ? null : notifier.compressPdf,
-                isLoading: state.isBusy,
-                backgroundColor: MeiColors.pdfRedDeep,
-                width: double.infinity,
-              ),
-          ],
-
-          if (state.isBusy)
-            const Padding(
-              padding: EdgeInsets.only(top: MeiSpacing.lg),
-              child: LinearProgressIndicator(),
-            ),
-
-          if (done && state.outputPath != null)
-            Padding(
-              padding: const EdgeInsets.only(top: MeiSpacing.xxl),
-              child: _PdfSuccessCard(
-                outputPath: state.outputPath!,
-                title: ref.tr('pdf_success_compressed'),
-                onReset: notifier.convertAnother,
-                originalPaths: [state.pdfSourcePath!],
-              ),
-            ),
-
-          if (failed && state.failure != null)
-            Padding(
-              padding: const EdgeInsets.only(top: MeiSpacing.xxl),
-              child: _PdfErrorCard(
-                message: state.failure!.message,
-                onRetry: notifier.compressPdf,
-              ),
-            ),
-
-          const Gap(MeiSpacing.massive),
-        ],
-      ),
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tab 3 — Merge PDFs
@@ -680,8 +535,11 @@ class _MergePdfsTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state    = ref.watch(pdfToolsProvider);
     final notifier = ref.read(pdfToolsProvider.notifier);
-    final done     = state.status == PdfToolsStatus.done && state.tab == PdfToolsTab.mergePdfs;
-    final failed   = state.status == PdfToolsStatus.failed && state.tab == PdfToolsTab.mergePdfs;
+    final sub      = state.mergeState;
+    final done     = sub.status == PdfToolsStatus.done;
+    final failed   = sub.status == PdfToolsStatus.failed;
+    final isBusy   = sub.status == PdfToolsStatus.converting;
+    final hasMergePdfs = sub.mergePdfPaths.length >= 2;
 
     return SingleChildScrollView(
       padding: MeiSpacing.pageInsets,
@@ -692,7 +550,7 @@ class _MergePdfsTab extends ConsumerWidget {
         children: [
           const Gap(MeiSpacing.lg),
 
-          if (state.mergePdfPaths.isEmpty)
+          if (sub.mergePdfPaths.isEmpty)
             MeiEmptyState(
               icon: Icons.merge_type_rounded,
               title: ref.tr('pdf_empty_merge'),
@@ -772,7 +630,7 @@ class _MergePdfsTab extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  ref.tr('pdf_selected_pdfs_count').replaceAll('{count}', '${state.mergePdfPaths.length}'),
+                  ref.tr('pdf_selected_pdfs_count').replaceAll('{count}', '${sub.mergePdfPaths.length}'),
                   style: MeiTextStyles.headlineSmall,
                 ),
                 TextButton.icon(
@@ -790,13 +648,13 @@ class _MergePdfsTab extends ConsumerWidget {
             ReorderableListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: state.mergePdfPaths.length,
+              itemCount: sub.mergePdfPaths.length,
               onReorderItem: notifier.reorderMergePdfItem,
               itemBuilder: (context, index) {
-                final name = state.mergePdfPaths[index].split('/').last;
-                final sizeStr = _getFileSize(state.mergePdfPaths[index]);
+                final name = sub.mergePdfPaths[index].split('/').last;
+                final sizeStr = _getFileSize(sub.mergePdfPaths[index]);
                 return _FileListTile(
-                  key: ValueKey(state.mergePdfPaths[index] + index.toString()),
+                  key: ValueKey(sub.mergePdfPaths[index] + index.toString()),
                   name: name,
                   index: index,
                   icon: Icons.picture_as_pdf_rounded,
@@ -809,41 +667,41 @@ class _MergePdfsTab extends ConsumerWidget {
             ),
 
             const Gap(MeiSpacing.xxl),
-            if (state.status != PdfToolsStatus.done)
+            if (sub.status != PdfToolsStatus.done)
               MeiButton(
-                label: state.isBusy ? ref.tr('pdf_btn_merging') : ref.tr('pdf_btn_merge'),
+                label: isBusy ? ref.tr('pdf_btn_merging') : ref.tr('pdf_btn_merge'),
                 icon: Icons.merge_type_rounded,
-                onPressed: (state.hasMergePdfs && !state.isBusy)
+                onPressed: (hasMergePdfs && !isBusy)
                     ? notifier.mergePdfs
                     : null,
-                isLoading: state.isBusy,
+                isLoading: isBusy,
                 backgroundColor: MeiColors.pdfRedDeep,
                 width: double.infinity,
               ),
           ],
 
-          if (state.isBusy)
+          if (isBusy)
             const Padding(
               padding: EdgeInsets.only(top: MeiSpacing.lg),
               child: LinearProgressIndicator(),
             ),
 
-          if (done && state.outputPath != null)
+          if (done && sub.outputPath != null)
             Padding(
               padding: const EdgeInsets.only(top: MeiSpacing.xxl),
               child: _PdfSuccessCard(
-                outputPath: state.outputPath!,
+                outputPath: sub.outputPath!,
                 title: ref.tr('pdf_success_merged'),
                 onReset: notifier.convertAnother,
-                originalPaths: state.mergePdfPaths,
+                originalPaths: sub.mergePdfPaths,
               ),
             ),
 
-          if (failed && state.failure != null)
+          if (failed && sub.failure != null)
             Padding(
               padding: const EdgeInsets.only(top: MeiSpacing.xxl),
               child: _PdfErrorCard(
-                message: state.failure!.message,
+                message: sub.failure!.message,
                 onRetry: notifier.mergePdfs,
               ),
             ),
@@ -869,27 +727,39 @@ class _SplitPdfTab extends ConsumerStatefulWidget {
 class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
   late final TextEditingController _fromCtrl;
   late final TextEditingController _toCtrl;
+  late final FocusNode _fromFocusNode;
+  late final FocusNode _toFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _fromCtrl = TextEditingController(text: '1');
-    _toCtrl   = TextEditingController(text: '1');
+    final sub = ref.read(pdfToolsProvider).splitState;
+    _fromCtrl = TextEditingController(text: sub.splitFromPage.toString());
+    _toCtrl   = TextEditingController(text: sub.splitToPage.toString());
+    _fromFocusNode = FocusNode();
+    _toFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _fromCtrl.dispose();
     _toCtrl.dispose();
+    _fromFocusNode.dispose();
+    _toFocusNode.dispose();
     super.dispose();
   }
 
-  void _syncControllers(PdfToolsState state) {
-    // Keep text fields in sync when splitTotalPages changes
-    if (state.splitTotalPages != null) {
-      if (_toCtrl.text != state.splitTotalPages.toString() &&
-          state.splitToPage == state.splitTotalPages) {
-        _toCtrl.text = state.splitTotalPages.toString();
+  void _syncControllers(PdfSplitState sub) {
+    if (!_fromFocusNode.hasFocus) {
+      final fromStr = sub.splitFromPage.toString();
+      if (_fromCtrl.text != fromStr) {
+        _fromCtrl.text = fromStr;
+      }
+    }
+    if (!_toFocusNode.hasFocus) {
+      final toStr = sub.splitToPage.toString();
+      if (_toCtrl.text != toStr) {
+        _toCtrl.text = toStr;
       }
     }
   }
@@ -898,12 +768,19 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
   Widget build(BuildContext context) {
     final state    = ref.watch(pdfToolsProvider);
     final notifier = ref.read(pdfToolsProvider.notifier);
+    final sub      = state.splitState;
 
-    _syncControllers(state);
+    _syncControllers(sub);
 
-    final done   = state.status == PdfToolsStatus.done && state.tab == PdfToolsTab.splitPdf;
-    final failed = state.status == PdfToolsStatus.failed && state.tab == PdfToolsTab.splitPdf;
+    final done   = sub.status == PdfToolsStatus.done;
+    final failed = sub.status == PdfToolsStatus.failed;
     final isActive = state.tab == PdfToolsTab.splitPdf;
+    final hasSplitSource = sub.splitSourcePath != null;
+    final isBusy = sub.status == PdfToolsStatus.converting;
+    final splitRangeValid = sub.splitTotalPages != null &&
+        sub.splitFromPage >= 1 &&
+        sub.splitToPage >= sub.splitFromPage &&
+        sub.splitToPage <= (sub.splitTotalPages ?? 0);
 
     return SingleChildScrollView(
       padding: MeiSpacing.pageInsets,
@@ -914,7 +791,7 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
         children: [
           const Gap(MeiSpacing.lg),
 
-          if (!state.hasSplitSource)
+          if (!hasSplitSource)
             MeiEmptyState(
               icon: Icons.call_split_rounded,
               title: ref.tr('pdf_empty_split'),
@@ -973,14 +850,14 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              state.splitSourcePath!.split('/').last,
+                              sub.splitSourcePath!.split('/').last,
                               style: MeiTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w600),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const Gap(2),
                             Text(
-                              '${_getFileSize(state.splitSourcePath!)}${state.splitTotalPages != null ? ' · ${state.splitTotalPages} ${ref.tr('pdf_label_pages_suffix')}' : ''}',
+                              '${_getFileSize(sub.splitSourcePath!)}${sub.splitTotalPages != null ? ' · ${sub.splitTotalPages} ${ref.tr('pdf_label_pages_suffix')}' : ''}',
                               style: MeiTextStyles.bodySmall,
                             ),
                           ],
@@ -1031,11 +908,11 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
             const Gap(MeiSpacing.xxl),
 
             // Page range inputs
-            if (state.splitTotalPages != null && state.status != PdfToolsStatus.done) ...[
+            if (sub.splitTotalPages != null && sub.status != PdfToolsStatus.done) ...[
               Text(ref.tr('pdf_label_range'), style: MeiTextStyles.headlineSmall),
               const Gap(MeiSpacing.sm),
               Text(
-                ref.tr('pdf_label_range_sub').replaceAll('{total}', '${state.splitTotalPages}'),
+                ref.tr('pdf_label_range_sub').replaceAll('{total}', '${sub.splitTotalPages}'),
                 style: MeiTextStyles.bodySmall,
               ),
               const Gap(MeiSpacing.lg),
@@ -1046,8 +923,9 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
                     child: _PageRangeField(
                       label: ref.tr('pdf_label_from'),
                       controller: _fromCtrl,
+                      focusNode: _fromFocusNode,
                       min: 1,
-                      max: state.splitTotalPages ?? 1,
+                      max: sub.splitTotalPages ?? 1,
                       onChanged: (v) => notifier.setSplitFromPage(v),
                     ),
                   ),
@@ -1056,8 +934,9 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
                     child: _PageRangeField(
                       label: ref.tr('pdf_label_to'),
                       controller: _toCtrl,
+                      focusNode: _toFocusNode,
                       min: 1,
-                      max: state.splitTotalPages ?? 1,
+                      max: sub.splitTotalPages ?? 1,
                       onChanged: (v) => notifier.setSplitToPage(v),
                     ),
                   ),
@@ -1065,7 +944,7 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
               ),
 
               // Range validation hint
-              if (!state.splitRangeValid && isActive)
+              if (!splitRangeValid && isActive)
                 Padding(
                   padding: const EdgeInsets.only(top: MeiSpacing.sm),
                   child: Text(
@@ -1077,27 +956,27 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
 
               const Gap(MeiSpacing.xxl),
               MeiButton(
-                label: state.isBusy ? ref.tr('pdf_btn_extracting') : ref.tr('pdf_btn_split'),
+                label: isBusy ? ref.tr('pdf_btn_extracting') : ref.tr('pdf_btn_split'),
                 icon: Icons.call_split_rounded,
                 onPressed:
-                    (state.splitRangeValid && !state.isBusy)
+                    (splitRangeValid && !isBusy)
                         ? notifier.splitPdf
                         : null,
-                isLoading: state.isBusy,
+                isLoading: isBusy,
                 backgroundColor: MeiColors.pdfRedDeep,
                 width: double.infinity,
               ),
             ],
           ],
 
-          if (state.isBusy && isActive)
+          if (isBusy && isActive)
             const Padding(
               padding: EdgeInsets.only(top: MeiSpacing.lg),
               child: LinearProgressIndicator(),
             ),
 
           // Split success — show both output files
-          if (done && state.splitOutputPaths.isNotEmpty)
+          if (done && sub.splitOutputPaths.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: MeiSpacing.xxl),
               child: Column(
@@ -1106,18 +985,18 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
                   Text(ref.tr('pdf_success_split'),
                       style: MeiTextStyles.headlineSmall),
                   const Gap(MeiSpacing.md),
-                  ...state.splitOutputPaths.asMap().entries.map(
+                  ...sub.splitOutputPaths.asMap().entries.map(
                         (e) => Padding(
                           padding: const EdgeInsets.only(bottom: MeiSpacing.md),
                           child: _PdfSuccessCard(
                             outputPath: e.value,
                             title: e.key == 0
                                 ? ref.tr('pdf_success_split_extracted')
-                                    .replaceAll('{from}', '${state.splitFromPage}')
-                                    .replaceAll('{to}', '${state.splitToPage}')
+                                    .replaceAll('{from}', '${sub.splitFromPage}')
+                                    .replaceAll('{to}', '${sub.splitToPage}')
                                 : ref.tr('pdf_success_split_remainder'),
                             onReset: notifier.convertAnother,
-                            originalPaths: [state.splitSourcePath!],
+                            originalPaths: [sub.splitSourcePath!],
                           ),
                         ),
                       ),
@@ -1125,11 +1004,11 @@ class _SplitPdfTabState extends ConsumerState<_SplitPdfTab> {
               ),
             ),
 
-          if (failed && state.failure != null)
+          if (failed && sub.failure != null)
             Padding(
               padding: const EdgeInsets.only(top: MeiSpacing.xxl),
               child: _PdfErrorCard(
-                message: state.failure!.message,
+                message: sub.failure!.message,
                 onRetry: notifier.splitPdf,
               ),
             ),
@@ -1227,6 +1106,7 @@ class _PageRangeField extends StatelessWidget {
     required this.min,
     required this.max,
     required this.onChanged,
+    this.focusNode,
   });
 
   final String label;
@@ -1234,6 +1114,7 @@ class _PageRangeField extends StatelessWidget {
   final int min;
   final int max;
   final void Function(int) onChanged;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -1244,6 +1125,7 @@ class _PageRangeField extends StatelessWidget {
         const Gap(MeiSpacing.xs),
         TextField(
           controller: controller,
+          focusNode: focusNode,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           textAlign: TextAlign.center,

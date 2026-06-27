@@ -131,7 +131,7 @@ abstract final class FileTypeDetectorService {
       mimeType: 'application/pdf',
       category: MeiFileCategory.pdf,
       displayName: 'PDF Document',
-      availableConversions: ['compress'],
+      availableConversions: [],
     ),
 
     // Documents

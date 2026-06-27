@@ -24,7 +24,7 @@ class MeiAssets {
 class MeiStrings {
   const MeiStrings._();
 
-  static const String appName = 'Mei Convertor';
+  static const String appName = 'Mei Converter';
   static const String tagline = 'Convert anything, offline.';
   static const String version = '1.0.0';
 }

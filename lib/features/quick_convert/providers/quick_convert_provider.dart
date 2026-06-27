@@ -95,11 +95,12 @@ class QuickConvertNotifier extends Notifier<QuickConvertState> {
     );
 
     try {
-      final outputPath = await _dispatch(
+      var outputPath = await _dispatch(
         sourcePath: state.sourcePath!,
         targetFormat: state.targetFormat!,
         category: state.detectedType ?? MeiFileCategory.unknown,
       );
+      outputPath = await FileUtils.moveToPublic(outputPath);
 
       // Verify output exists
       final outFile = File(outputPath);
@@ -156,11 +157,8 @@ class QuickConvertNotifier extends Notifier<QuickConvertState> {
       if (category == MeiFileCategory.image) {
         return ImageConverterService.compress(sourcePath);
       }
-      if (category == MeiFileCategory.pdf) {
-        return PdfConverterService.compressPdf(sourcePath);
-      }
       throw const UnsupportedFormatFailure(
-        message: 'Compression is only supported for images and PDFs.',
+        message: 'Compression is only supported for images.',
       );
     }
 
@@ -305,7 +303,6 @@ String? _defaultTarget(String ext) => switch (ext) {
       'webp'          => 'jpg',
       'bmp'           => 'png',
       'gif'           => 'png',
-      'pdf'           => 'compress',
       'txt'           => 'docx',   // TXT now defaults to DOCX in Quick Convert
       'md'            => 'pdf',
       'docx' || 'doc' => 'txt',    // DOCX/DOC defaults to text extraction

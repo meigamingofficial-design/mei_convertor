@@ -330,61 +330,193 @@ int _getPageCount(Uint8List bytes) {
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
-enum PdfToolsTab { imagesToPdf, compress, mergePdfs, splitPdf }
+enum PdfToolsTab { imagesToPdf, mergePdfs, splitPdf }
 
 enum PdfToolsStatus { idle, converting, done, failed }
 
-class PdfToolsState {
-  const PdfToolsState({
-    this.tab = PdfToolsTab.imagesToPdf,
+class ImagesToPdfState {
+  const ImagesToPdfState({
     this.status = PdfToolsStatus.idle,
-    // — Images → PDF
     this.sourcePaths = const [],
-    // — Compress
-    this.pdfSourcePath,
-    this.compressionQuality = 60,
-    // — Merge
+    this.outputPath,
+    this.failure,
+  });
+
+  final PdfToolsStatus status;
+  final List<String> sourcePaths;
+  final String? outputPath;
+  final MeiFailure? failure;
+
+  ImagesToPdfState copyWith({
+    PdfToolsStatus? status,
+    List<String>? sourcePaths,
+    String? outputPath,
+    MeiFailure? failure,
+  }) =>
+      ImagesToPdfState(
+        status: status ?? this.status,
+        sourcePaths: sourcePaths ?? this.sourcePaths,
+        outputPath: outputPath ?? this.outputPath,
+        failure: failure ?? this.failure,
+      );
+}
+
+
+
+class PdfMergeState {
+  const PdfMergeState({
+    this.status = PdfToolsStatus.idle,
     this.mergePdfPaths = const [],
-    // — Split
+    this.outputPath,
+    this.failure,
+  });
+
+  final PdfToolsStatus status;
+  final List<String> mergePdfPaths;
+  final String? outputPath;
+  final MeiFailure? failure;
+
+  PdfMergeState copyWith({
+    PdfToolsStatus? status,
+    List<String>? mergePdfPaths,
+    String? outputPath,
+    MeiFailure? failure,
+  }) =>
+      PdfMergeState(
+        status: status ?? this.status,
+        mergePdfPaths: mergePdfPaths ?? this.mergePdfPaths,
+        outputPath: outputPath ?? this.outputPath,
+        failure: failure ?? this.failure,
+      );
+}
+
+class PdfSplitState {
+  const PdfSplitState({
+    this.status = PdfToolsStatus.idle,
     this.splitSourcePath,
     this.splitTotalPages,
     this.splitFromPage = 1,
     this.splitToPage = 1,
     this.splitPageCountLoading = false,
-    // — Output
     this.outputPath,
     this.splitOutputPaths = const [],
     this.failure,
   });
 
-  final PdfToolsTab tab;
   final PdfToolsStatus status;
-
-  // images → pdf
-  final List<String> sourcePaths;
-
-  // compress
-  final String? pdfSourcePath;
-  final int compressionQuality;
-
-  // merge
-  final List<String> mergePdfPaths;
-
-  // split
   final String? splitSourcePath;
   final int? splitTotalPages;
   final int splitFromPage;
   final int splitToPage;
   final bool splitPageCountLoading;
-
-  // output
   final String? outputPath;
   final List<String> splitOutputPaths;
   final MeiFailure? failure;
 
-  // ── Computed helpers ───────────────────────────────────────────────────────
+  PdfSplitState copyWith({
+    PdfToolsStatus? status,
+    String? splitSourcePath,
+    int? splitTotalPages,
+    int? splitFromPage,
+    int? splitToPage,
+    bool? splitPageCountLoading,
+    String? outputPath,
+    List<String>? splitOutputPaths,
+    MeiFailure? failure,
+  }) =>
+      PdfSplitState(
+        status: status ?? this.status,
+        splitSourcePath: splitSourcePath ?? this.splitSourcePath,
+        splitTotalPages: splitTotalPages ?? this.splitTotalPages,
+        splitFromPage: splitFromPage ?? this.splitFromPage,
+        splitToPage: splitToPage ?? this.splitToPage,
+        splitPageCountLoading: splitPageCountLoading ?? this.splitPageCountLoading,
+        outputPath: outputPath ?? this.outputPath,
+        splitOutputPaths: splitOutputPaths ?? this.splitOutputPaths,
+        failure: failure ?? this.failure,
+      );
+}
+
+class PdfToolsState {
+  PdfToolsState({
+    this.tab = PdfToolsTab.imagesToPdf,
+    ImagesToPdfState? imagesToPdfState,
+    PdfMergeState? mergeState,
+    PdfSplitState? splitState,
+    // For backward compatibility:
+    PdfToolsStatus? status,
+    List<String>? sourcePaths,
+    List<String>? mergePdfPaths,
+    String? splitSourcePath,
+    int? splitTotalPages,
+    int? splitFromPage,
+    int? splitToPage,
+    bool? splitPageCountLoading,
+    String? outputPath,
+    List<String>? splitOutputPaths,
+    MeiFailure? failure,
+  })  : imagesToPdfState = imagesToPdfState ??
+            ImagesToPdfState(
+              status: (tab == PdfToolsTab.imagesToPdf) ? (status ?? PdfToolsStatus.idle) : PdfToolsStatus.idle,
+              sourcePaths: sourcePaths ?? const [],
+              outputPath: (tab == PdfToolsTab.imagesToPdf) ? outputPath : null,
+              failure: (tab == PdfToolsTab.imagesToPdf) ? failure : null,
+            ),
+        mergeState = mergeState ??
+            PdfMergeState(
+              status: (tab == PdfToolsTab.mergePdfs) ? (status ?? PdfToolsStatus.idle) : PdfToolsStatus.idle,
+              mergePdfPaths: mergePdfPaths ?? const [],
+              outputPath: (tab == PdfToolsTab.mergePdfs) ? outputPath : null,
+              failure: (tab == PdfToolsTab.mergePdfs) ? failure : null,
+            ),
+        splitState = splitState ??
+            PdfSplitState(
+              status: (tab == PdfToolsTab.splitPdf) ? (status ?? PdfToolsStatus.idle) : PdfToolsStatus.idle,
+              splitSourcePath: splitSourcePath,
+              splitTotalPages: splitTotalPages,
+              splitFromPage: splitFromPage ?? 1,
+              splitToPage: splitToPage ?? 1,
+              splitPageCountLoading: splitPageCountLoading ?? false,
+              outputPath: (tab == PdfToolsTab.splitPdf) ? outputPath : null,
+              splitOutputPaths: splitOutputPaths ?? const [],
+              failure: (tab == PdfToolsTab.splitPdf) ? failure : null,
+            );
+
+  final PdfToolsTab tab;
+  final ImagesToPdfState imagesToPdfState;
+  final PdfMergeState mergeState;
+  final PdfSplitState splitState;
+
+  // Delegated getters pointing to active tab's sub-state
+  PdfToolsStatus get status => switch (tab) {
+        PdfToolsTab.imagesToPdf => imagesToPdfState.status,
+        PdfToolsTab.mergePdfs => mergeState.status,
+        PdfToolsTab.splitPdf => splitState.status,
+      };
+
+  String? get outputPath => switch (tab) {
+        PdfToolsTab.imagesToPdf => imagesToPdfState.outputPath,
+        PdfToolsTab.mergePdfs => mergeState.outputPath,
+        PdfToolsTab.splitPdf => splitState.outputPath,
+      };
+
+  MeiFailure? get failure => switch (tab) {
+        PdfToolsTab.imagesToPdf => imagesToPdfState.failure,
+        PdfToolsTab.mergePdfs => mergeState.failure,
+        PdfToolsTab.splitPdf => splitState.failure,
+      };
+
+  List<String> get sourcePaths => imagesToPdfState.sourcePaths;
+  List<String> get mergePdfPaths => mergeState.mergePdfPaths;
+  String? get splitSourcePath => splitState.splitSourcePath;
+  int? get splitTotalPages => splitState.splitTotalPages;
+  int get splitFromPage => splitState.splitFromPage;
+  int get splitToPage => splitState.splitToPage;
+  bool get splitPageCountLoading => splitState.splitPageCountLoading;
+  List<String> get splitOutputPaths => splitState.splitOutputPaths;
+
+  // Computed helpers
   bool get hasFiles          => sourcePaths.isNotEmpty;
-  bool get hasPdf            => pdfSourcePath != null;
   bool get hasMergePdfs      => mergePdfPaths.length >= 2;
   bool get hasSplitSource    => splitSourcePath != null;
   bool get isBusy            => status == PdfToolsStatus.converting;
@@ -395,12 +527,17 @@ class PdfToolsState {
       splitToPage >= splitFromPage &&
       splitToPage <= (splitTotalPages ?? 0);
 
+  /// Returns a clean slate for the given tab (resets output + errors).
+  PdfToolsState forTab(PdfToolsTab t) => PdfToolsState(tab: t);
+
   PdfToolsState copyWith({
     PdfToolsTab? tab,
+    ImagesToPdfState? imagesToPdfState,
+    PdfMergeState? mergeState,
+    PdfSplitState? splitState,
+    // Backward compatibility:
     PdfToolsStatus? status,
     List<String>? sourcePaths,
-    String? pdfSourcePath,
-    int? compressionQuality,
     List<String>? mergePdfPaths,
     String? splitSourcePath,
     int? splitTotalPages,
@@ -410,26 +547,38 @@ class PdfToolsState {
     String? outputPath,
     List<String>? splitOutputPaths,
     MeiFailure? failure,
-  }) =>
-      PdfToolsState(
-        tab: tab ?? this.tab,
-        status: status ?? this.status,
-        sourcePaths: sourcePaths ?? this.sourcePaths,
-        pdfSourcePath: pdfSourcePath ?? this.pdfSourcePath,
-        compressionQuality: compressionQuality ?? this.compressionQuality,
-        mergePdfPaths: mergePdfPaths ?? this.mergePdfPaths,
-        splitSourcePath: splitSourcePath ?? this.splitSourcePath,
-        splitTotalPages: splitTotalPages ?? this.splitTotalPages,
-        splitFromPage: splitFromPage ?? this.splitFromPage,
-        splitToPage: splitToPage ?? this.splitToPage,
-        splitPageCountLoading: splitPageCountLoading ?? this.splitPageCountLoading,
-        outputPath: outputPath ?? this.outputPath,
-        splitOutputPaths: splitOutputPaths ?? this.splitOutputPaths,
-        failure: failure ?? this.failure,
-      );
-
-  /// Returns a clean slate for the given tab (resets output + errors).
-  PdfToolsState forTab(PdfToolsTab t) => PdfToolsState(tab: t);
+  }) {
+    final nextTab = tab ?? this.tab;
+    return PdfToolsState(
+      tab: nextTab,
+      imagesToPdfState: imagesToPdfState ??
+          this.imagesToPdfState.copyWith(
+            status: (nextTab == PdfToolsTab.imagesToPdf) ? (status ?? this.imagesToPdfState.status) : this.imagesToPdfState.status,
+            sourcePaths: sourcePaths ?? this.imagesToPdfState.sourcePaths,
+            outputPath: (nextTab == PdfToolsTab.imagesToPdf) ? (outputPath ?? this.imagesToPdfState.outputPath) : this.imagesToPdfState.outputPath,
+            failure: (nextTab == PdfToolsTab.imagesToPdf) ? (failure ?? this.imagesToPdfState.failure) : this.imagesToPdfState.failure,
+          ),
+      mergeState: mergeState ??
+          this.mergeState.copyWith(
+            status: (nextTab == PdfToolsTab.mergePdfs) ? (status ?? this.mergeState.status) : this.mergeState.status,
+            mergePdfPaths: mergePdfPaths ?? this.mergeState.mergePdfPaths,
+            outputPath: (nextTab == PdfToolsTab.mergePdfs) ? (outputPath ?? this.mergeState.outputPath) : this.mergeState.outputPath,
+            failure: (nextTab == PdfToolsTab.mergePdfs) ? (failure ?? this.mergeState.failure) : this.mergeState.failure,
+          ),
+      splitState: splitState ??
+          this.splitState.copyWith(
+            status: (nextTab == PdfToolsTab.splitPdf) ? (status ?? this.splitState.status) : this.splitState.status,
+            splitSourcePath: splitSourcePath ?? this.splitState.splitSourcePath,
+            splitTotalPages: splitTotalPages ?? this.splitState.splitTotalPages,
+            splitFromPage: splitFromPage ?? this.splitState.splitFromPage,
+            splitToPage: splitToPage ?? this.splitState.splitToPage,
+            splitPageCountLoading: splitPageCountLoading ?? this.splitPageCountLoading,
+            outputPath: (nextTab == PdfToolsTab.splitPdf) ? (outputPath ?? this.splitState.outputPath) : this.splitState.outputPath,
+            splitOutputPaths: splitOutputPaths ?? this.splitOutputPaths,
+            failure: (nextTab == PdfToolsTab.splitPdf) ? (failure ?? this.splitState.failure) : this.splitState.failure,
+          ),
+    );
+  }
 }
 
 // ── Notifier ──────────────────────────────────────────────────────────────────
@@ -438,148 +587,141 @@ class PdfToolsNotifier extends Notifier<PdfToolsState> {
   static const _uuid = Uuid();
 
   @override
-  PdfToolsState build() => const PdfToolsState();
+  PdfToolsState build() => PdfToolsState();
+
+  // Helper updates for sub-states
+  void _updateImagesToPdf(ImagesToPdfState Function(ImagesToPdfState) update) {
+    state = state.copyWith(imagesToPdfState: update(state.imagesToPdfState));
+  }
+
+  void _updateMerge(PdfMergeState Function(PdfMergeState) update) {
+    state = state.copyWith(mergeState: update(state.mergeState));
+  }
+
+  void _updateSplit(PdfSplitState Function(PdfSplitState) update) {
+    state = state.copyWith(splitState: update(state.splitState));
+  }
 
   // ── Tab ───────────────────────────────────────────────────────────────────
 
-  void setTab(PdfToolsTab tab) => state = state.forTab(tab);
+  void setTab(PdfToolsTab tab) => state = state.copyWith(tab: tab);
 
   // ── Images → PDF ──────────────────────────────────────────────────────────
 
   void addFiles(List<String> paths) =>
-      state = state.copyWith(
-        sourcePaths: [...state.sourcePaths, ...paths],
+      _updateImagesToPdf((s) => s.copyWith(
+        sourcePaths: [...s.sourcePaths, ...paths],
         status: PdfToolsStatus.idle,
         outputPath: null,
         failure: null,
-      );
+      ));
 
   void removeFile(int index) {
-    final updated = List<String>.from(state.sourcePaths)..removeAt(index);
-    state = state.copyWith(sourcePaths: updated);
+    _updateImagesToPdf((s) {
+      final updated = List<String>.from(s.sourcePaths)..removeAt(index);
+      return s.copyWith(sourcePaths: updated);
+    });
   }
 
   void reorderFiles(int oldIndex, int newIndex) {
-    final updated = List<String>.from(state.sourcePaths);
-    if (newIndex > oldIndex) newIndex -= 1;
-    updated.insert(newIndex, updated.removeAt(oldIndex));
-    state = state.copyWith(sourcePaths: updated);
+    _updateImagesToPdf((s) {
+      final updated = List<String>.from(s.sourcePaths);
+      if (newIndex > oldIndex) newIndex -= 1;
+      updated.insert(newIndex, updated.removeAt(oldIndex));
+      return s.copyWith(sourcePaths: updated);
+    });
   }
 
   void reorderFilesItem(int oldIndex, int newIndex) {
-    final updated = List<String>.from(state.sourcePaths);
-    updated.insert(newIndex, updated.removeAt(oldIndex));
-    state = state.copyWith(sourcePaths: updated);
+    _updateImagesToPdf((s) {
+      final updated = List<String>.from(s.sourcePaths);
+      updated.insert(newIndex, updated.removeAt(oldIndex));
+      return s.copyWith(sourcePaths: updated);
+    });
   }
 
   Future<void> convertToPdf() async {
     if (state.sourcePaths.isEmpty) return;
-    state = state.copyWith(status: PdfToolsStatus.converting, failure: null);
+    _updateImagesToPdf((s) => s.copyWith(status: PdfToolsStatus.converting, failure: null));
     try {
-      final out = await PdfConverterService.imagesToPdf(state.sourcePaths);
+      var out = await PdfConverterService.imagesToPdf(state.sourcePaths);
+      out = await FileUtils.moveToPublic(out);
       await _saveHistory(
         inputPath: state.sourcePaths.first,
         outputPath: out,
         inputFormat: _ext(state.sourcePaths.first),
         outputFormat: 'pdf',
       );
-      state = state.copyWith(status: PdfToolsStatus.done, outputPath: out);
+      _updateImagesToPdf((s) => s.copyWith(status: PdfToolsStatus.done, outputPath: out));
     } catch (e) {
-      state = state.copyWith(
+      _updateImagesToPdf((s) => s.copyWith(
         status: PdfToolsStatus.failed,
         failure: ConversionFailure(message: e.toString(), cause: e),
-      );
+      ));
     }
   }
 
-  // ── Compress ──────────────────────────────────────────────────────────────
 
-  void setPdfSource(String path) =>
-      state = state.copyWith(
-        pdfSourcePath: path,
-        status: PdfToolsStatus.idle,
-        outputPath: null,
-        failure: null,
-      );
-
-  void setCompressionQuality(int quality) =>
-      state = state.copyWith(compressionQuality: quality);
-
-  Future<void> compressPdf() async {
-    if (state.pdfSourcePath == null) return;
-    state = state.copyWith(status: PdfToolsStatus.converting, failure: null);
-    try {
-      final out = await PdfConverterService.compressPdf(
-        state.pdfSourcePath!,
-        quality: state.compressionQuality,
-      );
-      await _saveHistory(
-        inputPath: state.pdfSourcePath!,
-        outputPath: out,
-        inputFormat: 'pdf',
-        outputFormat: 'pdf',
-      );
-      state = state.copyWith(status: PdfToolsStatus.done, outputPath: out);
-    } catch (e) {
-      state = state.copyWith(
-        status: PdfToolsStatus.failed,
-        failure: ConversionFailure(message: e.toString(), cause: e),
-      );
-    }
-  }
 
   // ── Merge ─────────────────────────────────────────────────────────────────
 
   void addMergePdfs(List<String> paths) =>
-      state = state.copyWith(
-        mergePdfPaths: [...state.mergePdfPaths, ...paths],
+      _updateMerge((s) => s.copyWith(
+        mergePdfPaths: [...s.mergePdfPaths, ...paths],
         status: PdfToolsStatus.idle,
         outputPath: null,
         failure: null,
-      );
+      ));
 
   void removeMergePdf(int index) {
-    final updated = List<String>.from(state.mergePdfPaths)..removeAt(index);
-    state = state.copyWith(mergePdfPaths: updated);
+    _updateMerge((s) {
+      final updated = List<String>.from(s.mergePdfPaths)..removeAt(index);
+      return s.copyWith(mergePdfPaths: updated);
+    });
   }
 
   void reorderMergePdf(int oldIndex, int newIndex) {
-    final updated = List<String>.from(state.mergePdfPaths);
-    if (newIndex > oldIndex) newIndex -= 1;
-    updated.insert(newIndex, updated.removeAt(oldIndex));
-    state = state.copyWith(mergePdfPaths: updated);
+    _updateMerge((s) {
+      final updated = List<String>.from(s.mergePdfPaths);
+      if (newIndex > oldIndex) newIndex -= 1;
+      updated.insert(newIndex, updated.removeAt(oldIndex));
+      return s.copyWith(mergePdfPaths: updated);
+    });
   }
 
   void reorderMergePdfItem(int oldIndex, int newIndex) {
-    final updated = List<String>.from(state.mergePdfPaths);
-    updated.insert(newIndex, updated.removeAt(oldIndex));
-    state = state.copyWith(mergePdfPaths: updated);
+    _updateMerge((s) {
+      final updated = List<String>.from(s.mergePdfPaths);
+      updated.insert(newIndex, updated.removeAt(oldIndex));
+      return s.copyWith(mergePdfPaths: updated);
+    });
   }
 
   Future<void> mergePdfs() async {
     if (!state.hasMergePdfs) return;
-    state = state.copyWith(status: PdfToolsStatus.converting, failure: null);
+    _updateMerge((s) => s.copyWith(status: PdfToolsStatus.converting, failure: null));
     try {
-      final out = await PdfConverterService.mergePdfs(state.mergePdfPaths);
+      var out = await PdfConverterService.mergePdfs(state.mergePdfPaths);
+      out = await FileUtils.moveToPublic(out);
       await _saveHistory(
         inputPath: state.mergePdfPaths.first,
         outputPath: out,
         inputFormat: 'pdf',
         outputFormat: 'pdf',
       );
-      state = state.copyWith(status: PdfToolsStatus.done, outputPath: out);
+      _updateMerge((s) => s.copyWith(status: PdfToolsStatus.done, outputPath: out));
     } catch (e) {
-      state = state.copyWith(
+      _updateMerge((s) => s.copyWith(
         status: PdfToolsStatus.failed,
         failure: ConversionFailure(message: e.toString(), cause: e),
-      );
+      ));
     }
   }
 
   // ── Split ─────────────────────────────────────────────────────────────────
 
   Future<void> setSplitSource(String path) async {
-    state = state.copyWith(
+    _updateSplit((s) => s.copyWith(
       splitSourcePath: path,
       splitTotalPages: null,
       splitFromPage: 1,
@@ -589,55 +731,58 @@ class PdfToolsNotifier extends Notifier<PdfToolsState> {
       splitOutputPaths: [],
       outputPath: null,
       failure: null,
-    );
+    ));
     try {
       final count = await PdfConverterService.getPdfPageCount(path);
-      state = state.copyWith(
+      _updateSplit((s) => s.copyWith(
         splitTotalPages: count,
         splitToPage: count,        // default: extract everything
         splitPageCountLoading: false,
-      );
+      ));
     } catch (e) {
-      state = state.copyWith(
+      _updateSplit((s) => s.copyWith(
         splitPageCountLoading: false,
         failure: ConversionFailure(
           message: 'Could not read PDF page count: $e',
           cause: e,
         ),
-      );
+      ));
     }
   }
 
-  void setSplitFromPage(int page) => state = state.copyWith(splitFromPage: page);
-  void setSplitToPage(int page)   => state = state.copyWith(splitToPage: page);
+  void setSplitFromPage(int page) => _updateSplit((s) => s.copyWith(splitFromPage: page));
+  void setSplitToPage(int page)   => _updateSplit((s) => s.copyWith(splitToPage: page));
 
   Future<void> splitPdf() async {
     if (!state.hasSplitSource || !state.splitRangeValid) return;
-    state = state.copyWith(status: PdfToolsStatus.converting, failure: null);
+    _updateSplit((s) => s.copyWith(status: PdfToolsStatus.converting, failure: null));
     try {
       final outputs = await PdfConverterService.splitPdf(
         state.splitSourcePath!,
         fromPage: state.splitFromPage,
         toPage: state.splitToPage,
       );
+      final publicOutputs = <String>[];
       for (final out in outputs) {
+        final pub = await FileUtils.moveToPublic(out);
+        publicOutputs.add(pub);
         await _saveHistory(
           inputPath: state.splitSourcePath!,
-          outputPath: out,
+          outputPath: pub,
           inputFormat: 'pdf',
           outputFormat: 'pdf',
         );
       }
-      state = state.copyWith(
+      _updateSplit((s) => s.copyWith(
         status: PdfToolsStatus.done,
-        splitOutputPaths: outputs,
-        outputPath: outputs.first,
-      );
+        splitOutputPaths: publicOutputs,
+        outputPath: publicOutputs.first,
+      ));
     } catch (e) {
-      state = state.copyWith(
+      _updateSplit((s) => s.copyWith(
         status: PdfToolsStatus.failed,
         failure: ConversionFailure(message: e.toString(), cause: e),
-      );
+      ));
     }
   }
 
@@ -653,17 +798,17 @@ class PdfToolsNotifier extends Notifier<PdfToolsState> {
       final size = File(outputPath).statSync().size;
       await ref.read(historyProvider.notifier).add(
             ConversionRecord(
-              id: _uuid.v4(),
-              inputFileName: inputPath.split('/').last,
-              inputPath: inputPath,
-              outputPath: outputPath,
-              inputFormat: inputFormat,
-              outputFormat: outputFormat,
-              fileSizeBytes: size,
-              convertedAt: DateTime.now(),
-              categoryName: 'pdf',
-            ),
-          );
+               id: _uuid.v4(),
+               inputFileName: inputPath.split('/').last,
+               inputPath: inputPath,
+               outputPath: outputPath,
+               inputFormat: inputFormat,
+               outputFormat: outputFormat,
+               fileSizeBytes: size,
+               convertedAt: DateTime.now(),
+               categoryName: 'pdf',
+             ),
+           );
     } catch (e) {
       MeiLogger.instance.w('Failed to save PDF history: $e');
     }
@@ -672,15 +817,30 @@ class PdfToolsNotifier extends Notifier<PdfToolsState> {
   String _ext(String path) => path.split('.').last.toLowerCase();
 
   void convertAnother() {
-    state = state.copyWith(
-      status: PdfToolsStatus.idle,
-      outputPath: null,
-      splitOutputPaths: [],
-      failure: null,
-    );
+    switch (state.tab) {
+      case PdfToolsTab.imagesToPdf:
+        _updateImagesToPdf((s) => s.copyWith(status: PdfToolsStatus.idle, outputPath: null, failure: null));
+      case PdfToolsTab.mergePdfs:
+        _updateMerge((s) => s.copyWith(status: PdfToolsStatus.idle, outputPath: null, failure: null));
+      case PdfToolsTab.splitPdf:
+        _updateSplit((s) => s.copyWith(status: PdfToolsStatus.idle, outputPath: null, splitOutputPaths: [], failure: null));
+    }
   }
 
-  void reset() => state = PdfToolsState(tab: state.tab);
+  void reset() {
+    switch (state.tab) {
+      case PdfToolsTab.imagesToPdf:
+        _updateImagesToPdf((s) => const ImagesToPdfState());
+      case PdfToolsTab.mergePdfs:
+        _updateMerge((s) => const PdfMergeState());
+      case PdfToolsTab.splitPdf:
+        _updateSplit((s) => const PdfSplitState());
+    }
+  }
+
+  void debugUpdateState(PdfToolsState Function(PdfToolsState) update) {
+    state = update(state);
+  }
 }
 
 final pdfToolsProvider =

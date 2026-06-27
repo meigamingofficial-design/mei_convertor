@@ -33,9 +33,32 @@ void main() {
       expect(state.selectedPaths, isEmpty);
     });
 
-    test('setTab changes tab without resetting files', () {
-      container.read(imageToolsProvider.notifier).setTab(ImageToolsTab.compress);
-      expect(container.read(imageToolsProvider).tab, ImageToolsTab.compress);
+    test('tab isolation and sub-state persistence', () {
+      final notifier = container.read(imageToolsProvider.notifier);
+      
+      // Initially convert outputFormat is png
+      expect(container.read(imageToolsProvider).convertState.outputFormat, 'png');
+
+      // Set properties on convert tab
+      notifier.setOutputFormat('webp');
+
+      // Switch to compress tab and set properties
+      notifier.setTab(ImageToolsTab.compress);
+      notifier.setQuality(75);
+
+      // Verify sub-states directly
+      var state = container.read(imageToolsProvider);
+      expect(state.convertState.outputFormat, 'webp');
+      expect(state.compressState.quality, 75);
+
+      // Switch back to convert and reset
+      notifier.setTab(ImageToolsTab.convert);
+      notifier.reset();
+
+      // Verify that reset only cleared the active tab (convertState), leaving compressState quality intact
+      state = container.read(imageToolsProvider);
+      expect(state.convertState.outputFormat, 'png'); // reset to default
+      expect(state.compressState.quality, 75);        // untouched!
     });
 
     test('setOutputFormat updates the format', () {
@@ -92,6 +115,39 @@ void main() {
       expect(state.status, DocumentsStatus.idle);
     });
 
+    test('tab isolation and sub-state persistence', () {
+      final notifier = container.read(documentsProvider.notifier);
+
+      // Set some file path on toPdf tab via debug update
+      notifier.debugUpdateState((s) => s.copyWith(
+        pdfState: s.pdfState.copyWith(selectedPath: '/test.txt', status: DocumentsStatus.done),
+      ));
+
+      // Switch to toDocx
+      notifier.setTab(DocumentsTab.toDocx);
+      expect(container.read(documentsProvider).selectedPath, isNull); // docx tab has no file yet
+
+      notifier.debugUpdateState((s) => s.copyWith(
+        docxState: s.docxState.copyWith(selectedPath: '/test2.txt', status: DocumentsStatus.failed),
+      ));
+
+      // Verify both are persistent
+      var state = container.read(documentsProvider);
+      expect(state.pdfState.selectedPath, '/test.txt');
+      expect(state.docxState.selectedPath, '/test2.txt');
+
+      // Switch back to toPdf and reset
+      notifier.setTab(DocumentsTab.toPdf);
+      notifier.reset();
+
+      // Verify that reset only cleared the active tab (toPdf), leaving toDocx intact
+      state = container.read(documentsProvider);
+      expect(state.pdfState.selectedPath, isNull);
+      expect(state.pdfState.status, DocumentsStatus.idle);
+      expect(state.docxState.selectedPath, '/test2.txt');
+      expect(state.docxState.status, DocumentsStatus.failed);
+    });
+
     test('reset clears state', () {
       container.read(documentsProvider.notifier).reset();
       expect(container.read(documentsProvider).hasFile, isFalse);
@@ -141,16 +197,7 @@ void main() {
       expect(paths[1], '/1.jpg');
     });
 
-    test('setCompressionQuality stores value', () {
-      container.read(pdfToolsProvider.notifier).setCompressionQuality(35);
-      expect(container.read(pdfToolsProvider).compressionQuality, 35);
-    });
 
-    test('setPdfSource stores path', () {
-      container.read(pdfToolsProvider.notifier).setPdfSource('/my.pdf');
-      expect(container.read(pdfToolsProvider).hasPdf, isTrue);
-      expect(container.read(pdfToolsProvider).pdfSourcePath, '/my.pdf');
-    });
 
     test('reset clears all state', () {
       final notifier = container.read(pdfToolsProvider.notifier);
@@ -159,9 +206,33 @@ void main() {
       expect(container.read(pdfToolsProvider).hasFiles, isFalse);
     });
 
-    test('setTab switches tab', () {
-      container.read(pdfToolsProvider.notifier).setTab(PdfToolsTab.compress);
-      expect(container.read(pdfToolsProvider).tab, PdfToolsTab.compress);
+    test('tab isolation and sub-state persistence', () {
+      final notifier = container.read(pdfToolsProvider.notifier);
+
+      // Add files in imagesToPdf tab
+      notifier.addFiles(['/x.jpg']);
+
+      // Switch to split and set state
+      notifier.setTab(PdfToolsTab.splitPdf);
+      notifier.debugUpdateState((s) => s.copyWith(
+        splitState: s.splitState.copyWith(splitSourcePath: '/split.pdf', splitTotalPages: 5),
+      ));
+
+      // Verify all sub-states are preserved
+      var state = container.read(pdfToolsProvider);
+      expect(state.imagesToPdfState.sourcePaths, ['/x.jpg']);
+      expect(state.splitState.splitSourcePath, '/split.pdf');
+      expect(state.splitState.splitTotalPages, 5);
+
+      // Switch back to imagesToPdf and reset
+      notifier.setTab(PdfToolsTab.imagesToPdf);
+      notifier.reset();
+
+      // Verify that reset only cleared the active tab (imagesToPdf), leaving others intact
+      state = container.read(pdfToolsProvider);
+      expect(state.imagesToPdfState.sourcePaths, isEmpty);
+      expect(state.splitState.splitSourcePath, '/split.pdf');
+      expect(state.splitState.splitTotalPages, 5);
     });
   });
 
