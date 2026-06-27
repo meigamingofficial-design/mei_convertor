@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mei Convertor — オフラインファイル変換ユーティリティ</title>
+  <title>Mei Convertor — Offline File Conversion Utility</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --sakura-primary: #e8729a;
@@ -20,7 +20,7 @@
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Plus Jakarta Sans', 'Noto Sans JP', -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
       background-color: var(--bg-cream);
       color: var(--text-dark);
       line-height: 1.8;
@@ -66,14 +66,10 @@
     .nav-links a:hover {
       color: var(--sakura-deep);
     }
-    .nav-links a.active {
-      color: var(--sakura-deep);
-      font-weight: 600;
-    }
     
     /* Hero Section */
     .hero {
-      padding: 120px 24px 90px;
+      padding: 140px 24px 110px;
       text-align: center;
       background: radial-gradient(circle at top, #fff3f6 0%, var(--bg-cream) 70%);
       border-bottom: 1px solid var(--border-color);
@@ -91,61 +87,18 @@
       border: 1px solid rgba(232, 114, 154, 0.2);
     }
     .hero h1 {
-      font-size: 42px;
+      font-size: 48px;
       font-weight: 700;
       color: var(--text-dark);
-      letter-spacing: -0.01em;
-      line-height: 1.3;
-      margin-bottom: 8px;
-    }
-    .hero .ja-subtitle {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-      letter-spacing: 0.2em;
-      display: block;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 16px;
     }
     .hero-desc {
       font-size: 16px;
       color: var(--text-muted);
       max-width: 600px;
-      margin: 0 auto 36px;
-    }
-    .hero-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 12px 28px;
-      border-radius: 100px;
-      font-weight: 600;
-      font-size: 15px;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .btn-primary {
-      background: var(--sakura-deep);
-      color: white;
-      box-shadow: 0 4px 12px rgba(184, 59, 94, 0.2);
-    }
-    .btn-primary:hover {
-      background: #9d2e4d;
-      transform: translateY(-2px);
-    }
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-dark);
-      border: 1px solid var(--border-color);
-    }
-    .btn-secondary:hover {
-      background: var(--sakura-light);
-      border-color: rgba(232, 114, 154, 0.3);
+      margin: 0 auto;
     }
     
     /* Content Section */
@@ -162,11 +115,7 @@
       font-size: 28px;
       font-weight: 700;
       margin-bottom: 6px;
-    }
-    .section-title .ja-desc {
-      font-size: 13px;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
+      letter-spacing: -0.01em;
     }
     
     .features-grid {
@@ -228,7 +177,6 @@
     🌸 Mei Convertor
   </a>
   <nav class="nav-links">
-    <a href="index.html" class="active">Home</a>
     <a href="privacy-policy.html">Privacy Policy</a>
     <a href="terms.html">Terms &amp; Conditions</a>
   </nav>
@@ -237,18 +185,12 @@
 <section class="hero">
   <span class="hero-badge">🔒 100% OFFLINE &amp; PRIVATE</span>
   <h1>Mei Convertor</h1>
-  <span class="ja-subtitle">— オフラインファイル変換ユーティリティ —</span>
   <p class="hero-desc">Your local, secure, and offline-first file conversion utility for Android and iOS. Your files never leave your device.</p>
-  <div class="hero-buttons">
-    <a href="privacy-policy.html" class="btn btn-primary">Privacy Policy</a>
-    <a href="terms.html" class="btn btn-secondary">Terms &amp; Conditions</a>
-  </div>
 </section>
 
 <main class="container">
   <div class="section-title">
     <h2>All-in-One Local Utility</h2>
-    <span class="ja-desc">— デバイス内で完結する安心の機能一覧 —</span>
   </div>
 
   <div class="features-grid">
