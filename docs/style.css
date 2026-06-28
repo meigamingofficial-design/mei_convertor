@@ -278,6 +278,7 @@ body.privacy-page {
   margin-bottom: 20px;
   background: linear-gradient(135deg, var(--text-dark) 30%, var(--sakura-deep));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -315,6 +316,7 @@ body.privacy-page {
   color: var(--text-dark);
   background: linear-gradient(135deg, var(--text-dark) 50%, var(--sakura-deep));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
   position: relative;
