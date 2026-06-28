@@ -26,7 +26,26 @@
 </header>
 
 <section class="hero">
-  <img src="https://i.giphy.com/rGneaNIeba7Y1a60xZ.gif" alt="Cute Goofy Writing Pencil" class="hero-gif" referrerpolicy="no-referrer">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="35 40 130 120" class="hero-illustration animated-pencil">
+    <!-- Writing line -->
+    <path d="M40 140 Q100 140 160 140" fill="none" stroke="rgba(232, 114, 154, 0.2)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M40 140 Q100 140 160 140" fill="none" stroke="#e8729a" stroke-width="4" stroke-linecap="round" class="writing-line"/>
+    <!-- Pencil -->
+    <g class="pencil-body" transform="translate(100, 115) rotate(-45)">
+      <!-- Eraser -->
+      <rect x="-8" y="-50" width="16" height="12" rx="2" fill="#ffb7c5"/>
+      <!-- Metal band -->
+      <rect x="-8" y="-38" width="16" height="6" fill="#ffd68a"/>
+      <!-- Pencil body -->
+      <rect x="-8" y="-32" width="16" height="50" fill="#e8729a"/>
+      <!-- Pencil stripes -->
+      <rect x="-4" y="-32" width="8" height="50" fill="#b83b5e" opacity="0.2"/>
+      <!-- Wood tip -->
+      <polygon points="-8,18 8,18 0,34" fill="#ffebc2"/>
+      <!-- Lead tip -->
+      <polygon points="-3,28 3,28 0,34" fill="#1d1d26"/>
+    </g>
+  </svg>
   <h1>Terms &amp; Conditions</h1>
 </section>
 

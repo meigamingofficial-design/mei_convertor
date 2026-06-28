@@ -175,17 +175,71 @@ body.privacy-page {
   align-items: center;
 }
 
-.hero-gif {
+.hero-illustration {
   width: 120px;
   height: 120px;
-  object-fit: contain;
   margin-bottom: 24px;
   filter: drop-shadow(0 8px 16px rgba(184, 59, 94, 0.12));
   transition: transform 0.3s ease;
 }
 
-.hero-gif:hover {
-  transform: scale(1.1) rotate(5deg);
+.hero-illustration:hover {
+  transform: scale(1.05);
+}
+
+/* Custom SVG Animations */
+@keyframes sway {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(6deg) translateY(-2px); }
+  100% { transform: rotate(0deg); }
+}
+
+.animated-sakura {
+  animation: sway 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes write {
+  0% { transform: translate(100px, 115px) rotate(-45deg) translate(-8px, 8px); }
+  50% { transform: translate(100px, 115px) rotate(-40deg) translate(8px, -4px); }
+  100% { transform: translate(100px, 115px) rotate(-45deg) translate(-8px, 8px); }
+}
+
+@keyframes draw-line {
+  0% { stroke-dashoffset: 120; }
+  50% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 120; }
+}
+
+.animated-pencil .pencil-body {
+  animation: write 3s ease-in-out infinite;
+}
+
+.animated-pencil .writing-line {
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  animation: draw-line 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0% { transform: scale(0.96); opacity: 0.6; }
+  50% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(0.96); opacity: 0.6; }
+}
+
+@keyframes lock-click {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.animated-shield .shield-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.animated-shield .lock-shackle {
+  animation: lock-click 3s ease-in-out infinite;
+  transform-origin: center;
 }
 
 .hero-badge {
