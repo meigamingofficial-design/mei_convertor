@@ -542,6 +542,30 @@ body.privacy-page {
   text-decoration: underline;
 }
 
+.footer-links {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.footer-links a:hover,
+.footer-links a.active {
+  color: var(--sakura-deep);
+}
+
+.footer-links .separator {
+  color: var(--border-color);
+  user-select: none;
+}
+
 /* Responsive Breakpoints */
 @media (max-width: 900px) {
   .legal-layout {
