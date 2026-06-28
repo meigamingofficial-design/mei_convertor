@@ -4,220 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mei Convertor — Offline File Conversion Utility</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Mei Convertor is a local, offline-first secure file conversion utility for Android. Convert images, documents, and PDFs entirely on-device.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --sakura-primary: #e8729a;
-      --sakura-light: #fff0f5;
-      --sakura-deep: #b83b5e;
-      --accent-gold: #ffd68a;
-      --text-dark: #1d1d26;
-      --text-muted: #535366;
-      --card-bg: rgba(255, 255, 255, 0.85);
-      --border-color: rgba(232, 114, 154, 0.15);
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background-image: url('index_bg.png');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      color: var(--text-dark);
-      line-height: 1.8;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-    
-    /* Navigation Bar */
-    .navbar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-color);
-      padding: 20px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--text-dark);
-      text-decoration: none;
-      letter-spacing: -0.03em;
-    }
-    .logo-img {
-      width: 32px;
-      height: 32px;
-      object-fit: contain;
-    }
-    .nav-logo span { color: var(--sakura-primary); }
-    .nav-links {
-      display: flex;
-      gap: 28px;
-    }
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .nav-links a:hover {
-      color: var(--sakura-deep);
-    }
-    
-    /* Hero Section */
-    .hero {
-      padding: 100px 24px 80px;
-      text-align: center;
-      position: relative;
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-color);
-    }
-    .hero-gif {
-      width: 130px;
-      height: 130px;
-      object-fit: contain;
-      margin-bottom: 16px;
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: var(--sakura-deep);
-      padding: 6px 18px;
-      border-radius: 100px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      margin-bottom: 24px;
-      border: 1px solid rgba(232, 114, 154, 0.25);
-      box-shadow: 0 4px 10px rgba(184, 59, 94, 0.04);
-    }
-    .hero h1 {
-      font-size: 52px;
-      font-weight: 700;
-      color: var(--text-dark);
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 20px;
-    }
-    .hero-desc {
-      font-size: 17px;
-      color: var(--text-muted);
-      max-width: 600px;
-      margin: 0 auto;
-      font-weight: 400;
-    }
-    
-    /* Content Section */
-    .container {
-      max-width: 1000px;
-      margin: 60px auto 100px;
-      padding: 60px 48px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 32px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.06);
-    }
-    .section-title {
-      text-align: center;
-      margin-bottom: 56px;
-    }
-    .section-title h2 {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 28px;
-    }
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: 24px;
-      padding: 40px;
-      box-shadow: 0 10px 30px rgba(184, 59, 94, 0.02);
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 20px 50px rgba(184, 59, 94, 0.06);
-      border-color: rgba(232, 114, 154, 0.35);
-    }
-    .card-icon {
-      font-size: 32px;
-      margin-bottom: 20px;
-      display: inline-block;
-    }
-    .card h3 {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-    .card p {
-      font-size: 15px;
-      color: var(--text-muted);
-    }
-    
-    /* Footer */
-    .footer {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid var(--border-color);
-      padding: 48px 24px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-    .footer a {
-      color: var(--sakura-deep);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="home-page">
 
 <header class="navbar">
-  <a href="index.html" class="nav-logo">
-    <img src="logo_transparent.png" alt="Logo" class="logo-img">
+  <a href="index.html" class="nav-logo" id="nav-logo-link">
+    <img src="logo_transparent.png" alt="Mei Convertor Logo" class="logo-img">
     Mei Convertor
   </a>
   <nav class="nav-links">
-    <a href="privacy-policy.html">Privacy Policy</a>
-    <a href="terms.html">Terms &amp; Conditions</a>
+    <a href="index.html" class="active" id="nav-link-home">Home</a>
+    <a href="privacy-policy.html" id="nav-link-privacy">Privacy Policy</a>
+    <a href="terms.html" id="nav-link-terms">Terms &amp; Conditions</a>
   </nav>
 </header>
 
 <section class="hero">
-  <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTlydmV5a3lpaTJnMzNzZnN5MGV4NmsyNnlqN2RkcW41a2p1ZzV4biZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lwaHkmY3Q9cw/7rM8oGZUXLw3L70R5O/giphy.gif" alt="Cute Goofy Dancing Flower" class="hero-gif">
-  <br>
+  <img src="https://i.giphy.com/JPyKvUiiO9Y496qQri.gif" alt="Cute Goofy Dancing Flower" class="hero-gif" referrerpolicy="no-referrer">
   <span class="hero-badge">🔒 100% OFFLINE &amp; PRIVATE</span>
   <h1>Mei Convertor</h1>
   <p class="hero-desc">Your local, secure, and offline-first file conversion utility for Android. Your files never leave your device.</p>
@@ -229,23 +38,23 @@
   </div>
 
   <div class="features-grid">
-    <div class="card">
-      <span class="card-icon">📁</span>
+    <div class="card" id="card-pdf-tools">
+      <div class="card-icon-wrapper">📁</div>
       <h3>PDF Tools</h3>
       <p>Combine multiple images into a single PDF, merge PDF files together, or split specific page ranges into new documents.</p>
     </div>
-    <div class="card">
-      <span class="card-icon">🖼️</span>
+    <div class="card" id="card-image-tools">
+      <div class="card-icon-wrapper">🖼️</div>
       <h3>Image Tools</h3>
       <p>Convert formats between JPEG, PNG, WebP, and BMP. Compress image file size or resize dimensions with custom pixel resolution.</p>
     </div>
-    <div class="card">
-      <span class="card-icon">📄</span>
+    <div class="card" id="card-document-tools">
+      <div class="card-icon-wrapper">📄</div>
       <h3>Document Tools</h3>
       <p>Convert plain text files (.txt, .md) to Word-compatible DOCX documents or clean PDFs. Extract text from DOCX files easily.</p>
     </div>
-    <div class="card">
-      <span class="card-icon">🌐</span>
+    <div class="card" id="card-multi-language">
+      <div class="card-icon-wrapper">🌐</div>
       <h3>Multi-language</h3>
       <p>Full native interface localization support for English, Japanese, Tamil, Spanish, Polish, Chinese, Korean, and Tagalog.</p>
     </div>
@@ -253,7 +62,7 @@
 </main>
 
 <footer class="footer">
-  <p>© 2026 Meigaming Studio · For support contact <a href="mailto:meigaming.official@gmail.com">meigaming.official@gmail.com</a></p>
+  <p>© 2026 Meigaming Studio · For support contact <a href="mailto:meigaming.official@gmail.com" id="support-email-link">meigaming.official@gmail.com</a></p>
 </footer>
 
 </body>

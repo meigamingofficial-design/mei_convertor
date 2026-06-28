@@ -4,210 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terms &amp; Conditions — Mei Convertor</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Read the terms and conditions for using Mei Convertor, a secure offline file conversion application.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --sakura-primary: #e8729a;
-      --sakura-light: #fff0f5;
-      --sakura-deep: #b83b5e;
-      --accent-gold: #ffd68a;
-      --text-dark: #1d1d26;
-      --text-muted: #535366;
-      --card-bg: rgba(255, 255, 255, 0.85);
-      --border-color: rgba(232, 114, 154, 0.15);
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background-image: url('terms_bg.png');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      color: var(--text-dark);
-      line-height: 1.8;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-    
-    /* Navigation Bar */
-    .navbar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-color);
-      padding: 20px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--text-dark);
-      text-decoration: none;
-      letter-spacing: -0.03em;
-    }
-    .logo-img {
-      width: 32px;
-      height: 32px;
-      object-fit: contain;
-    }
-    .nav-logo span { color: var(--sakura-primary); }
-    .nav-links {
-      display: flex;
-      gap: 28px;
-    }
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .nav-links a:hover {
-      color: var(--sakura-deep);
-    }
-    
-    /* Hero Section */
-    .hero {
-      padding: 100px 24px 80px;
-      text-align: center;
-      position: relative;
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-color);
-    }
-    .hero-gif {
-      width: 130px;
-      height: 130px;
-      object-fit: contain;
-      margin-bottom: 16px;
-    }
-    .hero h1 {
-      font-size: 44px;
-      font-weight: 700;
-      color: var(--text-dark);
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      margin-bottom: 8px;
-    }
-    
-    /* Content Section */
-    .container {
-      max-width: 800px;
-      margin: 60px auto 100px;
-      padding: 60px 48px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 32px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.06);
-    }
-    .meta-box {
-      background: var(--sakura-light);
-      border: 1px solid rgba(232, 114, 154, 0.15);
-      border-radius: 18px;
-      padding: 24px;
-      margin-bottom: 40px;
-      font-size: 14px;
-      color: var(--text-dark);
-    }
-    .meta-box strong {
-      color: var(--sakura-deep);
-    }
-    
-    h2 {
-      font-size: 22px;
-      font-weight: 700;
-      margin: 44px 0 16px;
-      color: var(--text-dark);
-      border-bottom: 2px solid var(--sakura-light);
-      padding-bottom: 8px;
-    }
-    h2:first-of-type {
-      margin-top: 0;
-    }
-    p {
-      margin-bottom: 16px;
-      color: var(--text-muted);
-      font-size: 15px;
-    }
-    ul {
-      margin: 0 0 24px 20px;
-      color: var(--text-muted);
-      font-size: 15px;
-    }
-    li {
-      margin-bottom: 8px;
-    }
-    strong {
-      color: var(--text-dark);
-    }
-    
-    /* Footer */
-    .footer {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid var(--border-color);
-      padding: 48px 24px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-    .footer a {
-      color: var(--sakura-deep);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="terms-page">
 
 <header class="navbar">
-  <a href="index.html" class="nav-logo">
-    <img src="logo_transparent.png" alt="Logo" class="logo-img">
+  <a href="index.html" class="nav-logo" id="nav-logo-link">
+    <img src="logo_transparent.png" alt="Mei Convertor Logo" class="logo-img">
     Mei Convertor
   </a>
   <nav class="nav-links">
-    <a href="index.html">Home</a>
-    <a href="privacy-policy.html">Privacy Policy</a>
+    <a href="index.html" id="nav-link-home">Home</a>
+    <a href="privacy-policy.html" id="nav-link-privacy">Privacy Policy</a>
+    <a href="terms.html" class="active" id="nav-link-terms">Terms &amp; Conditions</a>
   </nav>
 </header>
 
 <section class="hero">
-  <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmQ4MWY1MGZqMDFnbW5yeXg1OGN4amQyd241a2p1ZzV4biZlcD12MV9pbnRlcm5hbF9naWZfYnlfZ2lwaHkmY3Q9cw/3orif2u99L2O6Gi1CW/giphy.gif" alt="Cute Goofy Writing Pencil" class="hero-gif">
-  <br>
+  <img src="https://i.giphy.com/rGneaNIeba7Y1a60xZ.gif" alt="Cute Goofy Writing Pencil" class="hero-gif" referrerpolicy="no-referrer">
   <h1>Terms &amp; Conditions</h1>
 </section>
 
-<main class="container">
-  <div class="legal-card">
-    <div class="meta-box">
+<main class="legal-layout">
+  <aside class="legal-sidebar">
+    <nav class="legal-nav" aria-label="Table of contents">
+      <a href="#sec-1" class="legal-nav-link active">1. Acceptance of Terms</a>
+      <a href="#sec-2" class="legal-nav-link">2. Description of the App</a>
+      <a href="#sec-3" class="legal-nav-link">3. Permitted Use</a>
+      <a href="#sec-4" class="legal-nav-link">4. User Responsibilities</a>
+      <a href="#sec-5" class="legal-nav-link">5. Intellectual Property</a>
+      <a href="#sec-6" class="legal-nav-link">6. Disclaimer of Warranties</a>
+      <a href="#sec-7" class="legal-nav-link">7. Limitation of Liability</a>
+      <a href="#sec-8" class="legal-nav-link">8. Third-Party Components</a>
+      <a href="#sec-9" class="legal-nav-link">9. Privacy Summary</a>
+      <a href="#sec-10" class="legal-nav-link">10. Updates &amp; Changes</a>
+      <a href="#sec-11" class="legal-nav-link">11. Termination</a>
+      <a href="#sec-12" class="legal-nav-link">12. Governing Law</a>
+      <a href="#sec-13" class="legal-nav-link">13. Contact Info</a>
+    </nav>
+  </aside>
+
+  <div class="legal-content">
+    <div class="meta-box" id="legal-meta-details">
       <strong>Effective Date:</strong> June 2026<br>
       <strong>Developer:</strong> Meigaming<br>
       <strong>Contact:</strong> <a href="mailto:meigaming.official@gmail.com" style="color: var(--sakura-deep); text-decoration: none;">meigaming.official@gmail.com</a><br>
       <strong>App:</strong> Mei Convertor (com.meigaming.meiconvertor)
     </div>
 
-    <h2>1. Acceptance of Terms</h2>
+    <h2 id="sec-1">1. Acceptance of Terms</h2>
     <p>By downloading, installing, or using Mei Convertor ("the App"), you agree to be bound by these Terms and Conditions ("Terms"). If you do not agree, do not use the App.</p>
     <p>These Terms constitute the entire agreement between you and Meigaming ("we", "us", "our") regarding your use of the App.</p>
 
-    <h2>2. Description of the App</h2>
+    <h2 id="sec-2">2. Description of the App</h2>
     <p>Mei Convertor is a local, offline-first file conversion utility that allows users to:</p>
     <ul>
       <li>Convert images between formats (JPEG, PNG, WebP, BMP, etc.)</li>
@@ -219,7 +73,7 @@
     </ul>
     <p>All processing is performed locally on the user's device. No files are uploaded to any server.</p>
 
-    <h2>3. Permitted Use</h2>
+    <h2 id="sec-3">3. Permitted Use</h2>
     <p>You may use the App for <strong>personal or commercial purposes</strong>, subject to the following conditions:</p>
     <ul>
       <li>You must comply with all applicable local, national, and international laws and regulations.</li>
@@ -227,7 +81,7 @@
       <li>You must not attempt to reverse-engineer, decompile, or modify the App's binaries.</li>
     </ul>
 
-    <h2>4. User Responsibilities</h2>
+    <h2 id="sec-4">4. User Responsibilities</h2>
     <p>You are solely responsible for:</p>
     <ul>
       <li>The files you select for conversion and the outputs you generate.</li>
@@ -237,10 +91,10 @@
     </ul>
     <p>Meigaming bears no responsibility for loss, corruption, or misuse of files processed through the App.</p>
 
-    <h2>5. Intellectual Property</h2>
+    <h2 id="sec-5">5. Intellectual Property</h2>
     <p>All trademarks, branding, logos, user interface designs, and source code related to Mei Convertor are the exclusive intellectual property of Meigaming. Nothing in these Terms grants you any right to use Meigaming's intellectual property other than as strictly necessary to use the App as intended.</p>
 
-    <h2>6. Disclaimer of Warranties</h2>
+    <h2 id="sec-6">6. Disclaimer of Warranties</h2>
     <p>The App is provided <strong>"as is"</strong> and <strong>"as available"</strong>, without warranties of any kind, express or implied, including but not limited to:</p>
     <ul>
       <li>Merchantability or fitness for a particular purpose</li>
@@ -250,7 +104,7 @@
     </ul>
     <p>Conversion results may vary depending on source file quality, device capabilities, and the nature of the content being converted.</p>
 
-    <h2>7. Limitation of Liability</h2>
+    <h2 id="sec-7">7. Limitation of Liability</h2>
     <p>To the maximum extent permitted by applicable law, Meigaming shall not be liable for any:</p>
     <ul>
       <li><strong>Direct damages</strong> arising from file loss or corruption</li>
@@ -259,7 +113,7 @@
     </ul>
     <p>This limitation applies regardless of whether Meigaming was advised of the possibility of such damages.</p>
 
-    <h2>8. Third-Party Open-Source Components</h2>
+    <h2 id="sec-8">8. Third-Party Open-Source Components</h2>
     <p>The App incorporates open-source libraries including but not limited to:</p>
     <ul>
       <li>syncfusion_flutter_pdf (Syncfusion Community License)</li>
@@ -268,11 +122,11 @@
     </ul>
     <p>Your use of these components is subject to their respective licenses. Meigaming does not claim ownership of these libraries.</p>
 
-    <h2>9. Privacy</h2>
+    <h2 id="sec-9">9. Privacy</h2>
     <p>Your privacy is important to us. Our use of your information is governed by our <a href="privacy-policy.html">Privacy Policy</a>, which is incorporated into these Terms by reference.</p>
     <p><strong>Summary:</strong> The App does not collect, store, or transmit any personal data. All file processing occurs locally on your device.</p>
 
-    <h2>10. Updates and Changes</h2>
+    <h2 id="sec-10">10. Updates and Changes</h2>
     <p>We may:</p>
     <ul>
       <li>Update the App at any time to add, remove, or modify features.</li>
@@ -280,13 +134,13 @@
     </ul>
     <p>Continued use of the App after any change constitutes your acceptance of the revised Terms.</p>
 
-    <h2>11. Termination</h2>
+    <h2 id="sec-11">11. Termination</h2>
     <p>We reserve the right to discontinue the App at any time without notice. Upon discontinuation, your right to use the App ceases immediately. Sections 5 (Intellectual Property), 6 (Disclaimer of Warranties), and 7 (Limitation of Liability) survive any termination.</p>
 
-    <h2>12. Governing Law</h2>
+    <h2 id="sec-12">12. Governing Law</h2>
     <p>These Terms are governed by and construed in accordance with the laws of India, without regard to conflict-of-law principles. Any disputes arising from or relating to these Terms shall be subject to the exclusive jurisdiction of the courts located in India.</p>
 
-    <h2>13. Contact</h2>
+    <h2 id="sec-13">13. Contact</h2>
     <p>For questions or concerns regarding these Terms:</p>
     <p>
       <strong>Developer:</strong> Meigaming<br>
@@ -297,8 +151,27 @@
 </main>
 
 <footer class="footer">
-  <p>© 2026 Meigaming Studio · For support contact <a href="mailto:meigaming.official@gmail.com">meigaming.official@gmail.com</a></p>
+  <p>© 2026 Meigaming Studio · For support contact <a href="mailto:meigaming.official@gmail.com" id="support-email-link">meigaming.official@gmail.com</a></p>
 </footer>
+
+<script>
+  // Dynamic Scroll Observer to highlight current active sidebar navigation item
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.legal-nav-link').forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${entry.target.id}`);
+          });
+        }
+      });
+    }, { rootMargin: '-10% 0px -75% 0px' });
+    
+    document.querySelectorAll('.legal-content h2').forEach(heading => {
+      observer.observe(heading);
+    });
+  });
+</script>
 
 </body>
 </html>
